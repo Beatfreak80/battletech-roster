@@ -154,8 +154,25 @@ section[aria-label="Heat"]{container-type:inline-size}
 #fcard.view .fcols>span:first-child,#fcard.view .frow .ck{display:none}
 #fcard.view .frow,.hexes.view .hx{cursor:default;pointer-events:none}
 .vnote{margin:0;font-size:12px;color:var(--muted);text-align:center}
-.frow:disabled{opacity:1;background:#f4f5f2;border-style:dashed;box-shadow:none;color:var(--muted)}
-.frow:disabled .ck{border-color:#c9cac6;background:transparent}
+.frow:disabled,.frow[aria-disabled=true]{opacity:1;background:#f4f5f2;border-style:dashed;box-shadow:none;color:var(--muted);cursor:default}
+.frow:disabled .ck,.frow[aria-disabled=true] .ck{border-color:#c9cac6;background:transparent}
+/* the ammo number is a small tappable chip; it opens a spinner (.apop) just below it */
+.famb{justify-self:center;pointer-events:auto;cursor:pointer;border:1px solid #c9cac6;border-radius:6px;padding:2px 7px;background:#fff;min-width:30px}
+.famb:hover,.famb.on{border-color:var(--ink);background:#f1f2ee}
+.apop{position:absolute;z-index:3;display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:#fff;border:1px solid #c9cac6;border-radius:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);min-width:220px}
+.apop .aph{font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--muted);font-weight:600}
+.apr{display:grid;grid-template-columns:1fr 44px 64px 44px;gap:6px;align-items:center;border-radius:8px}
+.apr.multi{grid-template-columns:22px 1fr 44px 64px 44px}
+.apr.lift{background:#f1f2ee;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+.apg{display:grid;place-items:center;height:40px;color:var(--muted);cursor:grab;touch-action:none}
+.apg svg{width:18px;height:18px}
+.apr .apl em{display:block;font-style:normal;font-family:var(--display);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#3f7a26}
+.apop .apn{font-size:11px;color:var(--muted);line-height:1.25;max-width:260px}
+.apr .apl{font-size:13px;font-weight:600}
+.apr .big{min-height:40px;font-size:22px;padding:0;touch-action:none;-webkit-touch-callout:none}
+.apr .apv{font-family:var(--mono);font-weight:700;font-size:20px;text-align:center}
+.apr .apv small{font-size:12px;color:var(--muted);font-weight:500}
 .ftotal{border-top:1px solid var(--rule);padding-top:10px}
 #fireSum{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .ftotal .lbl{margin-right:4px}
@@ -1415,9 +1432,10 @@ const rgb=c=>`rgb(${c.join(',')})`;
 function paintVals(cur,max,isCur,isMax){
   if(isCur<=0)return{kind:'dead',base:'#3b4148',stripe:'#23272c'};
   if(cur<=0){const t=1-isCur/isMax;return{kind:'struct',base:rgb(lerp([214,34,34],[118,14,16],t)),stripe:rgb(lerp([128,14,16],[52,6,8],t))}}
-  const hurt=isCur<isMax;  // structure damaged behind remaining front armour → hatch in the armour colour
-  if(cur<max){const c=ramp(cur/max);return{kind:'armour',base:rgb(c),stripe:hurt?rgb(c.map(v=>Math.round(v*.55))):rgb(c)}}
-  return{kind:'intact',base:'var(--intact)',stripe:hurt?'var(--intact-stripe)':'var(--intact)'};
+  // structure damaged behind remaining front armour → dark red hatching over the armour colour, darker the more is lost
+  const hurt=isCur<isMax,hs=hurt?rgb(lerp([150,18,20],[84,6,8],1-isCur/isMax)):null;
+  if(cur<max){const c=ramp(cur/max);return{kind:'armour',base:rgb(c),stripe:hurt?hs:rgb(c)}}
+  return{kind:'intact',base:'var(--intact)',stripe:hurt?hs:'var(--intact)'};
 }
 const paintFor=k=>{const s=state[k],m=MECH.locs[k];return paintVals(s.armor,m.armor,s.is,m.is)};
 const css=p=>p.base===p.stripe?p.base:`repeating-linear-gradient(45deg,${p.base} 0 3px,${p.stripe} 3px 6px)`;
@@ -1458,6 +1476,21 @@ const mechDead=()=>state.HD.is<=0||state.CT.is<=0;
 
 function destroy(k){state[k].armor=0;state[k].is=0;if(state[k].rear!=null)state[k].rear=0;
   const arm=MECH.armOf[k];if(arm&&state[arm].is>0)destroy(arm)}
+// ---- ammo explosion, BattleTech Core Rulebook (2026) rules ----
+// Damage is the rounds left × damage per round, capped at 20, applied straight to the location's internal structure.
+// If that destroys the location, the rest carries inward as normal damage. If the location survives, it loses its
+// rear armour (torsos) or its armour (arms, legs, head). The MechWarrior takes 1 hit (not 2). No CASE on any 'Mech yet.
+const EXPLODE_CAP=20;
+const explosionDmg=g=>Math.min(EXPLODE_CAP,(state.ammo[g]||0)*BINS[g].dmg);
+function explodeAmmo(k,g){
+  const dmg=explosionDmg(g),s=state[k],nm=MECH.locs[k].name,p=state.pilot;
+  const i=Math.min(s.is,dmg);s.is-=i;let rest=dmg-i,lost='';
+  if(s.is<=0){destroy(k);if(rest>0&&MECH.transfer[k])applyDamage(MECH.transfer[k],rest,false);else rest=0}
+  else if(s.rear!=null){s.rear=0;lost='rear armour lost'}else{s.armor=0;lost='armour lost'}
+  const before=p.hits;p.hits=Math.min(6,p.hits+1);
+  state.exploded={...(state.exploded||{}),[g]:dmg};
+  log.unshift(`Ammo explosion (${BINS[g].n}, ${k}): ${dmg} to ${nm} structure${s.is<=0?` · ${nm} destroyed${rest>0?`, ${rest} carried to ${MECH.locs[MECH.transfer[k]].name}`:''}`:` · ${lost}`} · MechWarrior hit (${p.hits}${p.hits>=6?', killed':`, consciousness roll ${CONS[before]}+`})`);
+}
 // one-or-more points through armour → structure → transfer
 function applyDamage(k,dmg,useRear){
   let loc=k,rear=useRear&&MECH.locs[k].rear!=null;
@@ -1524,7 +1557,7 @@ svg.addEventListener('click',e=>{const k=locAt(e.clientX,e.clientY);if(k)openCar
 const card=$('card'),scrim=$('scrim');
 function openCard(k,px,py){
   closeHeatPop();if(open&&open!==k)closeCard();
-  open=k;visit={k,before:JSON.stringify(state),dealt:0};
+  open=k;visit={k,before:JSON.stringify(state),dealt:0,rear:0};   // dealt: front (armour + structure taps), rear: rear-armour taps
   card.hidden=false;$('locs').hidden=true;render();
 }
 function closeCard(){
@@ -1547,8 +1580,9 @@ const ROWS=[
 ];
 function step(row,dir){
   const k=open,s=state[k],m=MECH.locs[k];snap();
-  if(dir<0){row.minus(k);visit.dealt++}
-  else{const max=row.key==='armor'?m.armor:row.key==='rear'?m.rear:m.is;if(s[row.key]<max){s[row.key]++;visit.dealt=Math.max(0,visit.dealt-1)}}
+  const t=row.key==='rear'?'rear':'dealt';
+  if(dir<0){row.minus(k);visit[t]++}
+  else{const max=row.key==='armor'?m.armor:row.key==='rear'?m.rear:m.is;if(s[row.key]<max){s[row.key]++;visit[t]=Math.max(0,visit[t]-1)}}
   if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}
   render();
 }
@@ -1576,7 +1610,13 @@ function renderCrits(k){
     slots.slice(a,b).map((c,j)=>{const i=a+j,blank=!c.g,hit=!blank&&(s.crits[i]||dead),out=!hit&&c.g&&!MULTI[c.g]&&groupHits(c.g)>0;
       return `<button type="button" class="slot${hit?' hit':''}${out?' out':''}${c.g?'':' ff'}" data-i="${i}" ${blank?'disabled aria-disabled="true"':dead?'disabled':`aria-pressed="${hit}"`}><span class="n">${j+1}</span><span class="t">${c.n}</span></button>`}).join('')+`</div>`).join('')+`</div>`;
   // Roll Again and Ferro-Fibrous are empty slots: nothing to hit, so they aren't buttons you can tap
-  box.querySelectorAll('.slot:not(.ff)').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i;snap();s.crits[i]=!s.crits[i];render()}));
+  box.querySelectorAll('.slot:not(.ff)').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i,g=slots[i].g;
+    const live=!s.crits[i]&&g&&/^ammo/.test(g)&&BINS[g]&&!binLost(g)&&(state.ammo[g]||0)>0;   // a loaded bin about to be hit
+    snap();s.crits[i]=!s.crits[i];
+    if(!s.crits[i]&&g&&state.exploded&&state.exploded[g]!=null&&!CRIT[k].some((c,j)=>c.g===g&&s.crits[j]))delete state.exploded[g];
+    if(live){const d=explosionDmg(g);
+      if(confirm(`Ammo explosion: ${BINS[g].n} (${state.ammo[g]} rounds) in the ${MECH.locs[k].name}.\n\n${d} damage to its internal structure (capped at ${EXPLODE_CAP}), anything left carries inward, the location loses its ${MECH.locs[k].rear!=null?'rear ':''}armour if it survives, and the MechWarrior takes 1 hit.\n\nApply the explosion now? (Cancel just marks the slot as hit.)`))explodeAmmo(k,g)}
+    render()}));
 }
 // Critical effects, per Total Warfare as summarised on the AGoAC reference card and rules forum rulings.
 const lostItem=(k,name)=>CRIT[k].some((c,i)=>c.n===name&&lost(k,i));
@@ -1643,7 +1683,8 @@ function renderCritSummary(){
   if(!seen.size){$('critSum').innerHTML='';return}
   const items=[...seen.entries()].map(([g,e])=>{const max=MULTI[g];
     let st=max?`${Math.min(e.h,max)}/${max} hits${e.h>=max?' · destroyed':''}`:'destroyed',warn=g==='cock'||(max&&e.h>=max);
-    if(/^ammo/.test(g)){const n=state.ammo[g]??0;st=n?`explodes · ${n*BINS[g].dmg} dmg`:'empty · no explosion';warn=n>0}
+    if(/^ammo/.test(g)){const n=state.ammo[g]??0,x=state.exploded&&state.exploded[g];
+      st=x!=null?`exploded · ${x} dmg`:n?`explodes · ${explosionDmg(g)} dmg`:'empty · no explosion';warn=n>0}
     return `<li><span>${e.n.replace('Autocannon/20','AC/20')} <span class="lbl">${[...e.locs].join('/')}</span></span><span class="${warn?'warn':''}">${st}</span></li>`});
   $('critSum').innerHTML=`<details class="mfold"${critOpen?' open':''}><summary>Critical damage <b>${items.length}</b></summary><ul>${items.join('')}</ul></details>`;
 }
@@ -1655,7 +1696,8 @@ function renderCard(){
     r.v.innerHTML=`${v}<small>/${max}</small>`;r.bar.style.width=(100*v/max)+'%';
     r.bar.style.background=css(row.key==='is'?paintVals(v<max?0:1,1,v,max):paintVals(v,max,s.is,m.is));   // full structure stays grey
     r.mi.disabled=dead;r.pl.disabled=v>=max}
-  $('cTally').innerHTML=visit.dealt?`<b>−${visit.dealt}</b>`:'';
+  // front and rear kept apart on locations with rear armour: −5/−3 (front/rear)
+  $('cTally').innerHTML=m.rear!=null?(visit.dealt||visit.rear?`<b title="Front / rear">−${visit.dealt}/−${visit.rear}</b>`:''):visit.dealt?`<b>−${visit.dealt}</b>`:'';
   const before=JSON.parse(visit.before),moved=MECH.list.filter(x=>x!==k&&JSON.stringify(before[x])!==JSON.stringify(state[x]));
   $('cNote').textContent=moved.length?`→ ${moved.join(', ')}`:'';
   renderCrits(k);
@@ -1696,6 +1738,12 @@ scrim.addEventListener('pointerdown',closePilot,true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePilot()});
 const binLost=b=>state[BINS[b].loc].is<=0||groupHits(b)>0;
 const binLeft=b=>binLost(b)?0:state.ammo[b];
+// a weapon's bins in the order the player set (saved per 'Mech in state.binOrder, keyed by the weapon's bin list)
+const binOrderSet=bins=>!!(state.binOrder&&state.binOrder[bins.join()]);
+function orderedBins(bins){const o=(state.binOrder&&state.binOrder[bins.join()])||[];
+  return[...o.filter(b=>bins.includes(b)),...bins.filter(b=>!o.includes(b))]}
+// "LT bin", numbered when a weapon has two bins in the same location
+function binLabel(bins,b){const loc=BINS[b].loc,same=bins.filter(x=>BINS[x].loc===loc);return same.length>1?`${loc} bin ${same.indexOf(b)+1}`:`${loc} bin`}
 // to-hit penalty from damaged actuators in the arm a weapon is mounted in
 function armMod(w){if(!w.arm||state[w.arm].is<=0)return 0;if(lostItem(w.arm,'Shoulder'))return 4;return['Upper Arm Actuator','Lower Arm Actuator'].filter(a=>lostItem(w.arm,a)).length}
 function weaponMod(w){let m=heatFire(state.heat);const sen=groupHits('sen');if(sen===1)m+=2;
@@ -1714,7 +1762,7 @@ function openAmmo(i){closeCard();closePilot();ammoFor=i;acard.hidden=false;scrim
 function renderAmmo(){
   if(acard.hidden||ammoFor==null)return;const w=WEAPONS[ammoFor];
   $('acTitle').textContent=`${w.n} ammo`;
-  $('acRows').innerHTML=w.ammo.map(b=>{const B=BINS[b],v=state.ammo[b],lostB=binLost(b);
+  $('acRows').innerHTML=orderedBins(w.ammo).map(b=>{const B=BINS[b],v=state.ammo[b],lostB=binLost(b);
     return `<div class="bin"><button type="button" class="big minus" data-b="${b}" data-d="-1" ${lostB||v<=0?'disabled':''} aria-label="Fire one shot from ${B.loc} bin">−</button>
       <div class="mid"><span class="lbl">${B.loc} bin${lostB?' · lost':''}</span><span class="v">${lostB?0:v}<small> / ${B.max}</small></span></div>
       <button type="button" class="big" data-b="${b}" data-d="1" ${lostB||v>=B.max?'disabled':''} aria-label="Add one shot to ${B.loc} bin">+</button></div>`}).join('');
@@ -1774,8 +1822,60 @@ function canFire(i){const w=WEAPONS[i];if(groupHits(w.g)>0||groupHits('sen')>=2)
 // rounds available to a set of bins this turn: what's left plus rounds already spent by weapons ticked earlier this turn
 function ammoAvail(bins){const key=bins.join();let n=bins.reduce((a,b)=>a+binLeft(b),0);
   for(const i of Object.keys(state.fired))if(WEAPONS[i].ammo&&WEAPONS[i].ammo.join()===key&&state.fired[i]!=null)n++;return n}
-function openFire(id){if(typeof id==='string')useUnit(id);closeCard();closePilot();fireSel=new Set(Object.keys(state.fired).map(Number));fcard.hidden=false;scrim.hidden=false;renderFire()}
-function closeFire(){if(fcard.hidden)return;fcard.hidden=true;scrim.hidden=true}
+function openFire(id){if(typeof id==='string')useUnit(id);closeCard();closePilot();ammoPop=null;ammoEdited=false;fireSel=new Set(Object.keys(state.fired).map(Number));fcard.hidden=false;scrim.hidden=false;renderFire()}
+function closeFire(){if(fcard.hidden)return;fcard.hidden=true;scrim.hidden=true;ammoPop=null;if(ammoEdited){ammoEdited=false;renderHome()}}
+// ---- ammo spinner in the fire dialog: − / + per bin the weapon feeds from, up to each bin's capacity ----
+let ammoPop=null,ammoEdited=false;   // weapon index whose spinner is open; whether any bin changed while the dialog was open
+function renderAmmoPop(){
+  fcard.querySelectorAll('.apop').forEach(x=>x.remove());
+  const a=ammoPop!=null&&$('fireRows').querySelector(`[data-am="${ammoPop}"]`);if(!a){ammoPop=null;return}
+  const w=WEAPONS[ammoPop],pop=document.createElement('div');pop.className='apop';pop.setAttribute('role','group');pop.setAttribute('aria-label',`${w.n} ammo`);
+  const multi=w.ammo.length>1,set=binOrderSet(w.ammo);
+  pop.innerHTML=`<span class="aph">${w.n} ammo</span>`+orderedBins(w.ammo).map((b,j)=>{const B=BINS[b],v=state.ammo[b],lostB=binLost(b);
+    return `<div class="apr${multi?' multi':''}" data-bin="${b}">${multi?`<span class="apg" role="button" tabindex="0" aria-label="Drag to reorder: the top bin fires first"><svg aria-hidden="true"><use href="#i-grip"/></svg></span>`:''}
+      <span class="apl">${binLabel(w.ammo,b)}${lostB?' · lost':''}${multi&&set&&j===0?'<em>Fires first</em>':''}</span>
+      <button type="button" class="big minus" data-b="${b}" data-d="-1" ${lostB||v<=0?'disabled':''} aria-label="One less round in the ${B.loc} bin">−</button>
+      <span class="apv">${lostB?0:v}<small>/${B.max}</small></span>
+      <button type="button" class="big" data-b="${b}" data-d="1" ${lostB||v>=B.max?'disabled':''} aria-label="One more round in the ${B.loc} bin">+</button></div>`}).join('');
+  if(multi)pop.insertAdjacentHTML('beforeend',`<span class="apn">${set?'Shots come from the top bin first. Drag to change.':'Shots come from the fullest bin. Drag a bin to the top to use it first.'}</span>`);
+  fcard.append(pop);
+  // drag a bin by its grip; rows swap live, and the new order is saved (per 'Mech) on release
+  pop.querySelectorAll('.apg').forEach(g=>g.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();
+    const row=g.closest('.apr');row.classList.add('lift');try{g.setPointerCapture(e.pointerId)}catch(_){}
+    const mv=ev=>{const rows=[...pop.querySelectorAll('.apr')].filter(r=>r!==row);
+      const at=rows.find(r=>{const b=r.getBoundingClientRect();return ev.clientY<b.top+b.height/2});
+      if(at){if(at!==row.nextElementSibling)pop.insertBefore(row,at)}else if(rows.length&&row!==rows[rows.length-1].nextElementSibling)rows[rows.length-1].after(row)};
+    const up=()=>{g.removeEventListener('pointermove',mv);g.removeEventListener('pointerup',up);g.removeEventListener('pointercancel',up);row.classList.remove('lift');
+      const order=[...pop.querySelectorAll('.apr')].map(r=>r.dataset.bin),key=w.ammo.join(),was=orderedBins(w.ammo).join();
+      if(order.join()!==was||!binOrderSet(w.ammo)){snap();state.binOrder={...(state.binOrder||{}),[key]:order};save();ammoEdited=true}
+      renderFire()};
+    g.addEventListener('pointermove',mv);g.addEventListener('pointerup',up);g.addEventListener('pointercancel',up)}));
+  // tap for one round; hold to keep going: repeats after a short pause and speeds up (1, then 5, then 10 a tick).
+  // While held only this spinner's numbers update; the dialog re-renders once on release. One undo step per press.
+  pop.querySelectorAll('button[data-b]').forEach(btn=>{const k=btn.dataset.b,d=+btn.dataset.d,row=btn.closest('.apr');
+    const show=()=>{const v=state.ammo[k];row.querySelector('.apv').innerHTML=`${v}<small>/${BINS[k].max}</small>`;
+      row.querySelector('[data-d="-1"]').disabled=v<=0;row.querySelector('[data-d="1"]').disabled=v>=BINS[k].max};
+    const bump=n=>{const v=Math.max(0,Math.min(BINS[k].max,state.ammo[k]+d*n));if(v===state.ammo[k])return false;state.ammo[k]=v;show();return true};
+    let timer=null,ticks=0,held=false;
+    const stop=()=>{if(!held)return;held=false;clearTimeout(timer);timer=null;save();ammoEdited=true;renderFire()};
+    btn.addEventListener('pointerdown',e=>{if(e.button>0)return;e.preventDefault();e.stopPropagation();
+      if(state.ammo[k]+d<0||state.ammo[k]+d>BINS[k].max)return;
+      snap();held=true;ticks=0;bump(1);try{btn.setPointerCapture(e.pointerId)}catch(_){}
+      const tick=()=>{if(!held)return;ticks++;if(!bump(ticks>30?10:ticks>12?5:1)){stop();return}timer=setTimeout(tick,ticks>6?60:110)};
+      timer=setTimeout(tick,400)});
+    btn.addEventListener('pointerup',stop);btn.addEventListener('pointercancel',stop);btn.addEventListener('lostpointercapture',stop);
+    btn.addEventListener('contextmenu',e=>e.preventDefault());   // a long press on a touch screen mustn't open the menu
+    // keyboard (Enter / Space) still steps one at a time
+    btn.onclick=e=>{e.stopPropagation();if(e.detail!==0)return;const v=state.ammo[k]+d;if(v<0||v>BINS[k].max)return;snap();bump(1);save();ammoEdited=true;renderFire()}});
+  // sit just under the number, right-aligned to it and kept inside the dialog
+  const c=fcard.getBoundingClientRect(),r=a.getBoundingClientRect();
+  pop.style.top=(r.bottom-c.top+fcard.scrollTop+6)+'px';
+  pop.style.left=Math.max(8,Math.min(c.width-pop.offsetWidth-8,r.right-c.left-pop.offsetWidth+10))+'px';
+}
+// a tap anywhere else in the dialog closes the spinner
+// (just removed, not re-rendered, so the same tap still lands on whatever it was aimed at, e.g. ticking a weapon)
+fcard.addEventListener('pointerdown',e=>{if(ammoPop!=null&&!e.target.closest('.apop,[data-am]')){ammoPop=null;
+  fcard.querySelectorAll('.apop').forEach(x=>x.remove());fcard.querySelectorAll('.famb.on').forEach(x=>x.classList.remove('on'))}});
 function renderFire(){
   if(fcard.hidden)return;
   const view=fireLocked();fcard.classList.toggle('view',view);
@@ -1792,11 +1892,15 @@ function renderFire(){
     WEAPONS.map((w,i)=>{const why=canFire(i),on=fireSel.has(i);
     let am='<span class="fst">–</span>',out=false;
     if(w.ammo){const av=ammoAvail(w.ammo),left=av-(need[w.ammo.join()]||0);out=!on&&(need[w.ammo.join()]||0)>=av;
-      am=`<span class="fst fa${left<=2?' low':''}" title="Shots left">${Math.max(0,left)}</span>`}
-    if(out)return row(w,'disabled',false,'<span class="fbad">No ammo</span>',am);
-    if(why&&!on)return row(w,'disabled',false,`<span class="fbad">${why}</span>`,am);
+      am=`<span class="fst fa famb${left<=2?' low':''}${ammoPop===i?' on':''}" role="button" tabindex="0" data-am="${i}" title="Shots left: tap to change" aria-label="${w.n} ammo, ${Math.max(0,left)} left: change">${Math.max(0,left)}</span>`}
+    if(out)return row(w,'aria-disabled="true"',false,'<span class="fbad">No ammo</span>',am);
+    if(why&&!on)return row(w,'aria-disabled="true"',false,`<span class="fbad">${why}</span>`,am);
     return row(w,`data-i="${i}" aria-pressed="${on}"`,on,armMod(w)?`<span class="farm" title="Arm actuator damage">+${armMod(w)}</span>`:'',am)}).join('');
   if(!view)$('fireRows').querySelectorAll('.frow[data-i]').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;fireSel.has(i)?fireSel.delete(i):fireSel.add(i);renderFire()});
+  // tap the ammo number to open a spinner for that weapon's bins (works in view-only mode too)
+  $('fireRows').querySelectorAll('[data-am]').forEach(a=>{const go=e=>{e.preventDefault();e.stopPropagation();const i=+a.dataset.am;ammoPop=ammoPop===i?null:i;renderFire()};
+    a.onclick=go;a.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')go(e)}});
+  renderAmmoPop();
   const wh=[...fireSel].reduce((a,i)=>a+WEAPONS[i].ht,0),mh=state.move.done?state.move.heat||0:0;
   $('fireSum').innerHTML=`<span class="lbl">Heat this turn</span><span class="fchip">Move +${mh}</span><span class="op">+</span><span class="fchip${wh?' up':''}">Weapons +${wh}</span><span class="op">=</span><span class="fchip tot${mh+wh?' up':''}">+${mh+wh}</span>`;
 }
@@ -1830,7 +1934,12 @@ function renderGator(){
     :'<div class="empty">No active enemy ’Mechs.</div>');
 }
 // take each shot from the bin with the most rounds left, so bins drain evenly
-function spendShot(bins){let best=null;for(const b of bins){if(binLost(b))continue;if(best===null||state.ammo[b]>state.ammo[best])best=b}
+// Shots come from the fullest bin (so bins drain evenly) until the player drags a bin to the top of the ammo spinner;
+// from then on that 'Mech uses its bins in the chosen order: the top bin until it's empty, then the next.
+function spendShot(bins){
+  let best=null;
+  if(binOrderSet(bins)){for(const b of orderedBins(bins))if(!binLost(b)&&state.ammo[b]>0){best=b;break}}
+  else for(const b of bins){if(binLost(b))continue;if(best===null||state.ammo[b]>state.ammo[best])best=b}
   if(best!==null&&state.ammo[best]>0){state.ammo[best]--;return best}return null}
 // OK records the ticked weapons (none ticked = not fired yet); Hold fire records a deliberate no-shot
 function commitFire(hold){
@@ -2501,7 +2610,7 @@ function resetGame(pilots){
   const keep=unitId;
   for(const id of Object.keys(UNITS)){useUnit(id);
     const P=pilots?freshPilot():{...freshPilot(),name:state.pilot.name,gunnery:state.pilot.gunnery,piloting:state.pilot.piloting};
-    state={...fresh(),pilot:P};log=['New game'];history=[];save()}
+    state={...fresh(),pilot:P,...(state.binOrder?{binOrder:state.binOrder}:{})};log=['New game'];history=[];save()}
   if(keep)useUnit(keep);
   CAMP={...CAMP,kurita:{wp:1000,sp:0},davion:{wp:1000,sp:0},ledger:[],played:false};saveCamp();
   PH={phase:'initiative',init:null};savePhase();
