@@ -1855,9 +1855,9 @@ $('fcHold').onclick=()=>commitFire(true);
 $('fcClose').onclick=closeFire;
 // ---- physical attacks (Physical Attack phase): what each attack would do, from tonnage, actuators and this turn's move ----
 // Damage (Total Warfare): punch tons/10 up, halved for each missing or destroyed upper / lower arm actuator (rounded down);
-// kick tons/5 up, halved likewise for upper / lower leg actuators; death from above tons/10 × 3 up; charge tons/10 × (hexes − 1) up.
+// kick tons/5 up, halved likewise for upper / lower leg actuators; club tons/5 up, halved likewise (needs both hands); death from above tons/10 × 3 up; charge tons/10 × (hexes − 1) up.
 // To-hit starts from Piloting: punch +0 (+1 no hand, +2 per upper / lower arm actuator), kick −2 (+2 per upper / lower leg,
-// +1 foot), push −1; punch, kick and push add the attacker's movement modifier, charge and death from above don't.
+// +1 foot), push −1, club −1; punch, kick, club and push add the attacker's movement modifier, charge and death from above don't.
 // A 'Mech that jumped can only make a death from above; an arm (or leg) that fired a weapon this turn can't punch (or kick).
 // From memory of the rules: check the rulebook for edge cases.
 const pacard=$('pacard');
@@ -1886,6 +1886,17 @@ function physAttacks(){
     kicks.push({n:'Kick',loc:L,hit:P-2+mm+2*lostAct+(noFoot?1:0),dmg:half(Math.ceil(T/5),lostAct),no,note:parts.join(', ')})}
   const same=(a,b)=>a.hit===b.hit&&a.dmg===b.dmg&&a.no===b.no&&a.note===b.note;
   if(same(kicks[0],kicks[1]))out.push({...kicks[0],loc:'–'});else out.push(...kicks);
+  // club (a tree, girder or torn-off limb): swung with both hands, tons/5 up; like a punch, each missing or destroyed
+  // upper / lower arm actuator (in either arm) halves the damage and adds +2 to hit; base to-hit Piloting −1
+  // only for 'Mechs built with a hand in each arm: without both, it can't hold a club at all
+  if(['LA','RA'].every(A=>has(A,'Hand Actuator'))){let no=null;const arms=['LA','RA'];
+    const lost=['Upper Arm Actuator','Lower Arm Actuator'].filter(a=>arms.some(A=>!ok(A,a))).length;
+    if(arms.some(A=>state[A].is<=0||lostItem(A,'Shoulder')))no='Needs both arms';
+    else if(arms.some(A=>!ok(A,'Hand Actuator')))no='Hand destroyed';
+    else if(jumped)no='Jumped this turn';else if(firedFrom('LA')||firedFrom('RA'))no='Fired an arm weapon';
+    const parts=['Needs a club: a tree, girder or torn-off limb, picked up in an earlier turn'];
+    if(lost)parts.unshift(`${lost===2?'upper and lower':!arms.every(A=>ok(A,'Upper Arm Actuator'))?'upper':'lower'} arm actuator lost`);
+    out.push({n:'Club',loc:'–',hit:P-1+mm+2*lost,dmg:half(Math.ceil(T/5),lost),no,note:parts.join('. ')})}
   // death from above: only for 'Mechs with jump jets
   if(BASE_MP.jump>0){const E=effects();let no=null;
     if(legDead)no='Leg destroyed';else if(E.jump<=0)no='No jump MP';else if(moved&&!jumped)no='Didn’t jump';
@@ -1908,7 +1919,7 @@ function renderPhys(){
   $('paTitle').textContent=`Physical attacks · ${CH.name}`;
   const chips=[`<span class="fchip">Piloting ${P}</span>`,`<span class="fchip${mm?' up':''}">${moved?(mv.mode==='none'?'Stood still':`${MOVE_MODES[mv.mode].l} ${mv.hexes}`):'Not moved'} +${mm}</span>`];
   $('paMods').innerHTML=`<div class="fnum" title="Base physical to-hit: Piloting"><b>${P}+</b><small>Piloting</small></div>
-    <div class="fparts"><div class="fchips">${chips.join('')}</div><span class="note">To-hit below includes actuators and, for punches, kicks and pushes, this ’Mech’s movement. Then add the target’s movement and terrain.</span></div>`;
+    <div class="fparts"><div class="fchips">${chips.join('')}</div><span class="note">To-hit below includes actuators and, for punches, kicks, clubs and pushes, this ’Mech’s movement. Then add the target’s movement and terrain.</span></div>`;
   $('paRows').innerHTML=`<div class="fcols" aria-hidden="true"><span>Type</span><span>Loc</span><span>To-hit</span><span>Dmg</span></div>`+
     out.map(a=>`<div class="frow${a.no?' no':''}"><span class="fn"><span>${a.n}${a.no?` <span class="fbad">${a.no}</span>`:''}</span>${a.note?`<small>${a.note}</small>`:''}</span>
       <span class="floc">${a.loc}</span><span class="fst">${a.no?'–':`${a.hit}+`}</span><span class="fst">${typeof a.dmg==='number'?`<b>${a.dmg}</b>`:a.dmg}</span></div>`).join('');
