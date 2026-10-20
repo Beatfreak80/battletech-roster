@@ -290,7 +290,7 @@ h1 small{font-weight:500;color:var(--on-bg);opacity:.75;font-size:.55em;letter-s
 .grip svg{width:22px;height:22px;display:block}
 .mcard.dragging{opacity:.3}
 .home:not(.between) .zone.inactive .mrow{display:none}   /* not in the battle: no move or fire */
-.dragghost{position:fixed;z-index:50;pointer-events:none;opacity:.92;box-shadow:0 10px 24px var(--shadow);transform:rotate(1.5deg)}
+.dragghost{position:fixed;z-index:50;pointer-events:none;opacity:.92;box-shadow:0 10px 24px var(--shadow);transform:rotate(1.5deg);will-change:transform}
 .mcard{display:flex;flex-direction:column;gap:6px;align-items:stretch;text-align:left;padding:8px;border:2px solid var(--edge);border-radius:8px;background:var(--plate);text-transform:none;letter-spacing:0;font-family:var(--body);min-width:0}
 .mcard .thumb{aspect-ratio:1230/1060;width:100%;max-width:100%;display:block;background:var(--panel);border-radius:4px;overflow:hidden}
 .mcard .thumb svg{width:100%;height:100%;display:block}
@@ -1480,10 +1480,15 @@ function buildDrawing(defsEl,fillsEl,prefix){
 function paintDrawing(els){for(const k of MECH.list){const p=paintFor(k);els[k].pb.style.fill=p.base;els[k].ps.style.fill=p.stripe}}
 const svg=$('mech');
 let fills=$('fills'),fillEl={},mounted=null;
+// The drawing data is thousands of separate <polyline>s. Joined into one <path> (a subpath per line) it draws exactly
+// the same (opaque stroke, no fill, round caps and joins) but is one element instead of thousands, which keeps the
+// page light: worked out once per chassis, the first time its drawing is shown.
+const artOf=D=>D.artPath||(D.artPath='<path d="'+[...D.art.matchAll(/points="([^"]+)"/g)]
+  .map(m=>{const p=m[1].trim().split(/\s+/);return'M'+p[0]+(p.length>1?'L'+p.slice(1).join(' '):'')}).join('')+'"/>');
 function mountMech(){
   sideColours(svg,unitId);   // house colour on the drawing only; swatches and chips stay grey
   const defs=$('defs');[...defs.querySelectorAll('mask,pattern')].forEach(e=>e.remove());
-  fills.innerHTML='';$('art').innerHTML=DATA.art;$('art').style.strokeWidth=DATA.sw||'';
+  fills.innerHTML='';$('art').innerHTML=artOf(DATA);$('art').style.strokeWidth=DATA.sw||'';
   svg.setAttribute('viewBox',DATA.viewBox);
   svg.setAttribute('aria-label',`${CH.name} front view coloured by remaining armour. Tap a location to record damage.`);
   fillEl=buildDrawing(defs,fills,'');
@@ -1945,14 +1950,20 @@ const ROSTER={
   davion:[{unit:'bm1'},{unit:'bj1'},{unit:'as1'},{unit:'cp1'},{unit:'cn1'},{unit:'cd1'},{unit:'lc1'},{unit:'ef1'}],
 };
 const homeEl=$('home');
-// a small, non-interactive copy of the current unit's drawing for its roster card
+// a small, non-interactive copy of the current unit's drawing for its roster card.
+// Building one means parsing thousands of line segments, so each unit's picture is built once and kept;
+// every roster render moves the same element into the new card and just repaints its location fills.
+const THUMBS=new Map();   // unit id → {svg, els}
 function makeThumb(){
+  const t=THUMBS.get(unitId);
+  if(t){sideColours(t.svg,unitId);paintDrawing(t.els);return t.svg}
   const v=DATA.viewBox,s=mk('svg',{viewBox:v,preserveAspectRatio:'xMidYMid meet','aria-hidden':'true'});
-  const d=mk('defs'),f=mk('g'),a=mk('g',{class:'artc'});s.append(d,f,a);a.innerHTML=DATA.art;if(DATA.sw)a.style.strokeWidth=DATA.sw;
+  const d=mk('defs'),f=mk('g'),a=mk('g',{class:'artc'});s.append(d,f,a);a.innerHTML=artOf(DATA);if(DATA.sw)a.style.strokeWidth=DATA.sw;
   // drawn to scale by weight: 20 t is 60% height, rising evenly to full height at 100 t; feet stay on the bottom edge
   // drawTons (optional) overrides the weight it's drawn at, e.g. for a drawing that tall aerials make look small
   s.dataset.k=.6+.4*(Math.max(35,Math.min(100,CH.drawTons||CH.tons))-20)/80;   // 35 t or lighter is drawn as 35 t; fitted to the drawing by fitThumbs
-  sideColours(s,unitId);paintDrawing(buildDrawing(d,f,`t${unitId}-`));return s;
+  const els=buildDrawing(d,f,`t${unitId}-`);THUMBS.set(unitId,{svg:s,els});
+  sideColours(s,unitId);paintDrawing(els);return s;
 }
 function mechStatus(){
   const tot=MECH.list.reduce((a,k)=>a+MECH.locs[k].armor+(MECH.locs[k].rear||0),0);
@@ -2101,14 +2112,18 @@ let drag=null;
 function startDrag(e,card){
   e.preventDefault();e.stopPropagation();
   const r=card.getBoundingClientRect(),house=card.closest('.zone').dataset.house;
-  const ghost=card.cloneNode(true);ghost.classList.add('dragghost');Object.assign(ghost.style,{width:r.width+'px',left:r.left+'px',top:r.top+'px'});
+  const ghost=card.cloneNode(true);ghost.classList.add('dragghost');Object.assign(ghost.style,{width:r.width+'px',left:'0',top:'0'});
+  const place=(x,y)=>{ghost.style.transform=`translate3d(${x}px,${y}px,0) rotate(1.5deg)`};place(r.left,r.top);
   document.body.append(ghost);card.classList.add('dragging');
-  drag={card,ghost,house,dx:e.clientX-r.left,dy:e.clientY-r.top,id:card.dataset.unit,target:null,index:0};
+  drag={card,ghost,house,dx:e.clientX-r.left,dy:e.clientY-r.top,id:card.dataset.unit,target:null,index:0,over:null};
   const grip=e.currentTarget;grip.setPointerCapture(e.pointerId);
-  const move=ev=>{if(!drag)return;drag.ghost.style.left=ev.clientX-drag.dx+'px';drag.ghost.style.top=ev.clientY-drag.dy+'px';
-    const el=document.elementFromPoint(ev.clientX,ev.clientY);const z=el&&el.closest('.zone');
-    document.querySelectorAll('.zone.over').forEach(x=>x.classList.remove('over'));
-    if(z&&z.dataset.house===drag.house){z.classList.add('over');drag.target=z.dataset.list;
+  let last=null,queued=false;
+  const move=ev=>{if(!drag)return;last=ev;if(!queued){queued=true;requestAnimationFrame(step)}};
+  const step=()=>{queued=false;const ev=last;if(!drag||!ev)return;
+    place(ev.clientX-drag.dx,ev.clientY-drag.dy);
+    const el=document.elementFromPoint(ev.clientX,ev.clientY);let z=el&&el.closest('.zone');if(z&&z.dataset.house!==drag.house)z=null;
+    if(z!==drag.over){if(drag.over)drag.over.classList.remove('over');if(z)z.classList.add('over');drag.over=z}
+    if(z){drag.target=z.dataset.list;
       // drop position: before the first card whose middle is after the pointer (reading order)
       const cards=[...z.querySelectorAll('.mcard[data-unit]')].filter(c=>c!==drag.card);
       drag.index=cards.findIndex(c=>{const b=c.getBoundingClientRect();return ev.clientY<b.top+b.height/2&&(ev.clientY<b.top||ev.clientX<b.left+b.width/2)});
@@ -2117,7 +2132,8 @@ function startDrag(e,card){
     // keep the page scrolling when dragging near the top or bottom edge
     if(ev.clientY<60)scrollBy(0,-12);else if(ev.clientY>innerHeight-60)scrollBy(0,12)};
   const end=()=>{grip.removeEventListener('pointermove',move);grip.removeEventListener('pointerup',end);grip.removeEventListener('pointercancel',end);
-    const d=drag;drag=null;d.ghost.remove();d.card.classList.remove('dragging');document.querySelectorAll('.zone.over').forEach(x=>x.classList.remove('over'));
+    if(queued&&drag)step();   // the last move is still waiting for a frame: use it for the drop
+    const d=drag;drag=null;d.ghost.remove();d.card.classList.remove('dragging');if(d.over)d.over.classList.remove('over');
     if(d.target){const L=LISTS[d.house];L.active=L.active.filter(x=>x!==d.id);L.inactive=L.inactive.filter(x=>x!==d.id);
       const order=d.order.filter(x=>x!==d.id);order.splice(d.index,0,d.id);L[d.target]=order;saveLists();renderHome()}};
   grip.addEventListener('pointermove',move);grip.addEventListener('pointerup',end);grip.addEventListener('pointercancel',end);
@@ -2129,13 +2145,15 @@ function fitNames(){const els=[...document.querySelectorAll('.minfo .nm')];if(!e
   while(!fits()&&s>10){s-=0.5;els.forEach(el=>el.style.fontSize=s+'px')}}
 // size each roster picture by the 'Mech's drawn height (not its sheet box): the drawing's height is k of the
 // picture's height, centred, feet on the bottom edge; anything too wide for that is shrunk to fit the width
+const THUMB_BOX=new WeakMap();   // picture → its drawing's outline, measured once
 function fitThumbs(){
   for(const s of homeEl.querySelectorAll('.thumb svg[data-k]')){
     const a=s.querySelector('.artc'),bw=s.clientWidth,bh=s.clientHeight;if(!a||!bw||!bh)continue;
-    let b;try{b=a.getBBox()}catch(e){continue}if(!b.height)continue;
+    let b=THUMB_BOX.get(s);
+    if(!b){try{b=a.getBBox()}catch(e){continue}if(!b.height)continue;b={x:b.x,y:b.y,width:b.width,height:b.height};THUMB_BOX.set(s,b)}
     const pad=b.height*.04,ar=bw/bh;let H=(b.height+pad)/+s.dataset.k,W=H*ar;
     if(W<b.width+2*pad){W=b.width+2*pad;H=W/ar}
-    s.setAttribute('viewBox',`${b.x+b.width/2-W/2} ${b.y+b.height+pad-H} ${W} ${H}`);
+    const vb=`${b.x+b.width/2-W/2} ${b.y+b.height+pad-H} ${W} ${H}`;if(s.getAttribute('viewBox')!==vb)s.setAttribute('viewBox',vb);
   }
 }
 addEventListener('resize',()=>requestAnimationFrame(()=>{fitNames();fitThumbs()}));
