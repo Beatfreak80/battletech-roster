@@ -92,6 +92,7 @@ section[aria-label="Heat"]{container-type:inline-size}
 .fchips{display:flex;flex-wrap:wrap;gap:4px}
 .fchip{font-family:var(--mono);font-size:12px;font-weight:600;border:1px solid #c9cac6;background:#fff;border-radius:999px;padding:1px 8px;white-space:nowrap}
 .fchip.up{background:#fbe6c9;border-color:#e0a458;color:#7a4300}
+.fchip.cool{background:#e3edf5;border-color:#9bb7c9;color:#1f4a6b}
 .fmods .note{font-size:12px;color:var(--muted)}
 /* one row per weapon in record-sheet order: tick · type · loc · ht · dmg · min · S/M/L · ammo (headings share the columns) */
 #fcard{width:min(580px,calc(100vw - 32px))}
@@ -332,6 +333,11 @@ h1 small{font-weight:500;color:var(--on-bg);opacity:.75;font-size:.55em;letter-s
 .heatb{position:absolute;top:4px;right:4px;display:flex;align-items:center;gap:3px;border:1.5px solid #000;border-radius:12px;padding:1px 7px 1px 4px;font-family:var(--mono);font-size:13px;line-height:1.3}
 .mcard .thumb .heatb svg{width:14px;height:14px;display:inline}
 .heatb em{font-style:normal;font-size:10px;font-weight:600;opacity:.8}
+/* heat badge with the heat sink tag under it, top right of the picture */
+.htop{position:absolute;top:4px;right:4px;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.htop .heatb,.htop .ctag{position:static}
+.ctag.hstag{padding-right:2px}
+.ctag.hstag.hurt{color:var(--danger);font-weight:700}
 .ctag{position:absolute;bottom:4px;display:flex;align-items:center;gap:0;padding:0 6px 0 4px;border-radius:10px;font-family:var(--mono);font-size:10.5px;line-height:1.15;color:#333;white-space:nowrap}
 .ctags{position:absolute;right:4px;bottom:4px;display:flex;flex-direction:column;align-items:flex-end;gap:0}
 .ctags .ctag{position:static}
@@ -394,6 +400,7 @@ h1 small{font-weight:500;color:var(--on-bg);opacity:.75;font-size:.55em;letter-s
 .mvbtn.done:disabled{opacity:1}   /* a recorded move stays readable in the weapon attack phase: its modifiers matter there */
 .heatb{font-size:11px;padding:0 6px 0 3px;top:3px;right:3px}
 .mcard .thumb .heatb svg{width:12px;height:12px}
+.htop{top:3px;right:3px}
 .ctag{font-size:9.5px;bottom:3px;padding:0 5px 0 3px}.mcard .thumb .ctag svg{width:10.5px;height:10.5px}.ctags{right:3px;bottom:3px}
 .grip{width:30px;height:30px;top:3px;left:3px}
 .grip svg{width:18px;height:18px}
@@ -680,6 +687,10 @@ button.primary{box-shadow:0 2px 5px rgba(0,0,0,.25)}
 .mvbtn.shut{grid-column:1/-1;background:linear-gradient(#f9dcd8,#f0bcb5);color:#7d1712;border:1.5px solid #b3261e;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .mvbtn.shut .mvl{font-weight:700;letter-spacing:.06em}
 .mvsub{flex:1;text-align:center;font-family:var(--mono);font-size:11px;text-transform:none;letter-spacing:0;background:rgba(255,255,255,.55);border-radius:4px;line-height:16px}
+/* walk / run / jump under the Move button (before moving): light on the dark button */
+.mvm.mpw{justify-content:center}
+.mvsub.mp{flex:0 0 auto;padding:0 7px;text-align:center;background:rgba(255,255,255,.16);color:var(--panel);font-weight:600;letter-spacing:.04em;white-space:pre}
+.mvbtn.off .mvsub.mp{background:rgba(0,0,0,.06);color:var(--muted)}
 #sdBody{display:flex;flex-direction:column;gap:12px}
 .sdlead,.sdnote{margin:0;font-size:14px}
 .sdnote{font-size:13px;color:var(--muted)}
@@ -814,6 +825,7 @@ button.hbig{cursor:pointer}
 <symbol id="i-grip" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="9" cy="6" r="1.8"/><circle cx="15" cy="6" r="1.8"/><circle cx="9" cy="12" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="9" cy="18" r="1.8"/><circle cx="15" cy="18" r="1.8"/></g></symbol>
 <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v8M7.2 6.2a7.5 7.5 0 1 0 9.6 0" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
 <symbol id="i-fist" viewBox="0 0 24 24"><path d="M6 10.5V8a1.6 1.6 0 0 1 3.2 0v-.8a1.6 1.6 0 0 1 3.2 0v.3a1.6 1.6 0 0 1 3.2 0v.6a1.6 1.6 0 0 1 3.2 0V14a6.5 6.5 0 0 1-6.5 6.5H11A5 5 0 0 1 6 15.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M6 12.5h4.2a1.6 1.6 0 0 0 0-3.2H8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-sinks" viewBox="0 0 24 24"><path d="M6.5 18q-2.3-1.5 0-3t0-3 0-3 0-3M12 18q-2.3-1.5 0-3t0-3 0-3 0-3M17.5 18q-2.3-1.5 0-3t0-3 0-3 0-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs></svg>
 <div class="home" id="home">
@@ -1823,7 +1835,12 @@ function canFire(i){const w=WEAPONS[i];if(groupHits(w.g)>0||groupHits('sen')>=2)
 function ammoAvail(bins){const key=bins.join();let n=bins.reduce((a,b)=>a+binLeft(b),0);
   for(const i of Object.keys(state.fired))if(WEAPONS[i].ammo&&WEAPONS[i].ammo.join()===key&&state.fired[i]!=null)n++;return n}
 function openFire(id){if(typeof id==='string')useUnit(id);closeCard();closePilot();ammoPop=null;ammoEdited=false;fireSel=new Set(Object.keys(state.fired).map(Number));fcard.hidden=false;scrim.hidden=false;renderFire()}
-function closeFire(){if(fcard.hidden)return;fcard.hidden=true;scrim.hidden=true;ammoPop=null;if(ammoEdited){ammoEdited=false;renderHome()}}
+// closing the dialog any way (×, tapping outside) keeps what's ticked, exactly as OK would: no need to press OK
+let firing=false;   // set while commitFire runs, so its own closeFire doesn't commit again
+const fireChanged=()=>{const was=Object.keys(state.fired).map(Number);return was.length!==fireSel.size||was.some(i=>!fireSel.has(i))};
+function closeFire(){if(fcard.hidden)return;
+  if(!firing&&!fireLocked()&&fireChanged()){commitFire(false);return}
+  fcard.hidden=true;scrim.hidden=true;ammoPop=null;if(ammoEdited){ammoEdited=false;renderHome()}}
 // ---- ammo spinner in the fire dialog: − / + per bin the weapon feeds from, up to each bin's capacity ----
 let ammoPop=null,ammoEdited=false;   // weapon index whose spinner is open; whether any bin changed while the dialog was open
 function renderAmmoPop(){
@@ -1902,7 +1919,11 @@ function renderFire(){
     a.onclick=go;a.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')go(e)}});
   renderAmmoPop();
   const wh=[...fireSel].reduce((a,i)=>a+WEAPONS[i].ht,0),mh=state.move.done?state.move.heat||0:0;
-  $('fireSum').innerHTML=`<span class="lbl">Heat this turn</span><span class="fchip">Move +${mh}</span><span class="op">+</span><span class="fchip${wh?' up':''}">Weapons +${wh}</span><span class="op">=</span><span class="fchip tot${mh+wh?' up':''}">+${mh+wh}</span>`;
+  // net heat this turn: move + weapons (+ engine damage and other heat) − working heat sinks
+  {const eh=state.heatDone?0:engineHeat(),xh=state.heatDone?0:state.extraHeat||0,hs=sinksLeft(),net=mh+wh+eh+xh-hs;
+   $('fireSum').innerHTML=`<span class="lbl">Heat this turn</span><span class="fchip">Move +${mh}</span><span class="op">+</span><span class="fchip${wh?' up':''}">Weapons +${wh}</span>`+
+     (eh?`<span class="op">+</span><span class="fchip up">Engine +${eh}</span>`:'')+(xh?`<span class="op">+</span><span class="fchip up">Other +${xh}</span>`:'')+
+     `<span class="op">−</span><span class="fchip cool" title="${hs} of ${HEAT_SINKS} heat sinks working">Heat sinks ${hs}</span><span class="op">=</span><span class="fchip tot${net>0?' up':' cool'}">${net>0?'+':net<0?'−':''}${Math.abs(net)}</span>`}
 }
 // GATOR: Gunnery + Attacker movement + Target movement + Other + Range. Everything but "other" (terrain, target prone,
 // arm actuators and so on) is known here; heat and sensor damage are folded in with the attacker's numbers.
@@ -1943,6 +1964,8 @@ function spendShot(bins){
   if(best!==null&&state.ammo[best]>0){state.ammo[best]--;return best}return null}
 // OK records the ticked weapons (none ticked = not fired yet); Hold fire records a deliberate no-shot
 function commitFire(hold){
+  if(firing)return;firing=true;try{commitFireNow(hold)}finally{firing=false}}
+function commitFireNow(hold){
   if(fireLocked())return;
   if(hold)fireSel=new Set();
   const before=new Set(Object.keys(state.fired).map(Number));
@@ -2190,7 +2213,12 @@ function buildCard(uid){
       const hb=document.createElement('span');hb.className='heatb';hb.style.background=hc;hb.style.color=h>=19?'#fff':'#000';
       hb.title=`Heat ${h}${tt?`, +${tt} this turn`:''}`;
       hb.innerHTML=`<svg aria-hidden="true"><use href="#i-heat"/></svg><b>${h}</b>${tt?`<em>+${tt}</em>`:''}`;
-      th.append(hb);
+      // heat sinks, as a small tag under the heat badge (working / total once any are destroyed)
+      const hsL=sinksLeft(),hsT=document.createElement('span');hsT.className='ctag hstag'+(hsL<HEAT_SINKS?' hurt':'');
+      hsT.title=`${hsL} of ${HEAT_SINKS} heat sinks working`;
+      hsT.innerHTML=`<svg aria-hidden="true"><use href="#i-sinks"/></svg>${hsL<HEAT_SINKS?`${hsL}/${HEAT_SINKS}`:HEAT_SINKS}`;
+      const top=document.createElement('span');top.className='htop';top.append(hb,hsT);
+      th.append(top);
       // tonnage and skill-adjusted BV in the bottom corners of the picture
       const bv=skillBV(CH.bv,state.pilot.gunnery,state.pilot.piloting);
       th.insertAdjacentHTML('beforeend',`<span class="ctags"><span class="ctag" title="${CH.tons} tons"><svg aria-hidden="true"><use href="#i-tons"/></svg>${CH.tons}</span><span class="ctag" title="Battle Value (base ${CH.bv.toLocaleString('en-GB')} × pilot skill)"><svg aria-hidden="true"><use href="#i-bv"/></svg>${bv}</span></span>`);
@@ -2216,7 +2244,9 @@ function buildCard(uid){
       const chip=(ic,v,t)=>`<span class="mvmod" title="${t}" ${modTint(v,0,true)}>${ICON(ic)}<span class="vh">${t} </span>+${v}</span>`;
       const mb=document.createElement('button');mb.type='button';mb.className='mvbtn'+(mv.done?' done mv2':PH.phase!=='movement'?' off':'');
       mb.innerHTML=mv.done?`<span class="mvl">${ICON('check')}${mvLbl}</span><span class="mvm">${chip('fire',mm.a,'Firing modifier')}${chip('shield',tm,'To be hit')}</span>`
-        :`${ICON('move')}Move`;mb.onclick=()=>openMove(uid);
+        :(()=>{const E=effects(false,heatBeforeMove());   // before moving: walk / run / jump available now (after heat and damage)
+          return `<span class="mvl">${ICON('move')}Move</span><span class="mvm mpw"><span class="mvsub mp" title="Walk ${E.walk} / Run ${E.run} / Jump ${E.jump}">${E.walk}/${E.run}/${E.jump}</span></span>`})();
+      if(!mv.done)mb.classList.add('mv2');mb.onclick=()=>openMove(uid);
       const fb=document.createElement('button');fb.type='button';fb.className='mvbtn'+(state.fireDone?' done':PH.phase!=='weapons'?' off':'');
       fb.innerHTML=state.fireDone?`${ICON('check')}${nf?'Fired':'Held'}`:`${ICON('fire')}Fire`;fb.onclick=()=>openFire(uid);
       // outside their phase (Battle mode) Move and Fire still open, view only
