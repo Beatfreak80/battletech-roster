@@ -9,5 +9,6 @@ __pycache__/
 *.pyc
 *.zip
 mockups/
+art-compare/
 preview/
 BRIEF.md

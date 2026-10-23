@@ -96,6 +96,7 @@ section[aria-label="Heat"]{container-type:inline-size}
 .fmods .note{font-size:12px;color:var(--muted)}
 /* one row per weapon in record-sheet order: tick · type · loc · ht · dmg · min · S/M/L · ammo (headings share the columns) */
 #fcard{width:min(580px,calc(100vw - 32px))}
+#fcTitle svg{width:.78em;height:.78em;margin-right:.3em;vertical-align:-.04em}
 .frows{display:flex;flex-direction:column;gap:6px}
 .fcols,.frow{display:grid;grid-template-columns:24px minmax(0,1fr) 62px 40px 50px 32px 66px 44px;gap:6px;align-items:center}
 .fcols{padding:0 12px;margin-bottom:-8px}
@@ -756,6 +757,46 @@ button.hbig{cursor:pointer}
 #mechView .rail{gap:8px;padding-top:10px}
 #mechView .fxlist{margin:0}
 #mechView .rail{border-top:1px solid var(--hair);padding-top:12px}
+/* Fire weapons with a target: the fire dialog and the chosen enemy's record sheet share one dialog, one side at a
+   time. A GATOR row or target button shows the sheet, "‹ Weapons" comes back. Each side keeps its own scroll and the
+   dialog always fits the screen. Outside it the wrappers vanish (display:contents) and the sheet is as normal. */
+.fsplit,.fpane{display:contents}
+.fsx,.ftabs{display:none}
+#mechView.split{display:flex;align-items:center;justify-content:center;overflow:hidden;padding:16px}
+#mechView.split .fsplit{display:flex;position:relative;width:min(580px,100%);max-height:calc(100dvh - 32px);background:var(--panel);border-radius:18px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.3),0 20px 56px rgba(0,0,0,.45)}
+#mechView.split .fsplit.sheet{width:min(640px,100%)}
+#mechView.split #fcard{position:relative;left:auto!important;top:auto!important;transform:none;z-index:auto;flex:1 1 auto;width:auto;max-height:none;min-height:0;overflow:auto;overscroll-behavior:contain;border:0;border-radius:0;box-shadow:none;animation:none}
+#mechView.split .fsplit:not(.sheet) .fpane,#mechView.split .fsplit.sheet #fcard{display:none}
+#mechView.split #fcClose,#mechView.split #backBtn{display:none}
+#mechView.split .fpane{display:block;flex:1 1 auto;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain}
+#mechView.split .msheet{max-width:none;margin:0;border-radius:0;box-shadow:none}
+#mechView.split .fsx{display:grid;place-items:center;position:absolute;top:12px;right:14px;z-index:3}
+#mechView.split .ftabs{display:flex;align-items:flex-start;gap:6px;position:sticky;top:0;z-index:2;background:var(--panel);padding:14px 76px 10px 14px;border-bottom:1px solid var(--hair)}
+.ftabs .lbl{margin-right:2px;line-height:34px;flex:none}
+.ftabs .fback{flex:none;display:inline-flex;align-items:center;gap:6px;padding:2px 14px 2px 10px;margin-right:6px;position:relative}
+.ftabs .fback svg{width:15px;height:15px}
+.ftabs .fback::after{content:"";position:absolute;right:-8px;top:4px;bottom:4px;border-right:1px solid var(--hair)}
+.ftlist{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+.ftabs button{min-height:34px;padding:2px 14px;border-radius:999px;font-family:var(--display);font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+/* the 'Mech names are tabs: squarer and grey, the one shown in black */
+.ftlist button{border-radius:10px;background:#e9e9e5;border-color:#b9bab5}
+.ftlist button.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.ftabs button.dead{text-decoration:line-through}
+/* damage waiting for the end of the phase: weapon tags, GATOR note, the phase-tab icon and the apply dialog */
+.fpend{font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#7a4300;background:#fbe6c9;border:1px solid #e0a458;border-radius:999px;padding:0 6px;margin-left:6px;white-space:nowrap}
+.gpend{display:block;font-style:normal;font-size:11px;color:var(--danger);line-height:1.1}
+.ptrack .pdmg{display:inline-grid;place-items:center;width:18px;height:18px;margin-left:5px;border-radius:999px;background:var(--danger);color:#fff;vertical-align:-4px}
+.ptrack .pdmg svg{width:12px;height:12px}
+#pdcard{width:min(480px,calc(100vw - 32px))}
+.pdlist{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto}
+.pdrow{border:1px solid var(--hair);border-radius:10px;background:#fff;padding:6px 10px;font-size:13.5px;line-height:1.35}
+.pdrow b{font-family:var(--display);font-size:16px;letter-spacing:.04em;text-transform:uppercase}
+.pdrow small{font-family:var(--mono);color:var(--muted);margin-left:6px}
+.pdrow .bad{color:var(--danger);font-style:normal;font-weight:600}
+.pdrow .psr{display:block;color:#7a4300;font-weight:600}
+/* GATOR rows open that enemy's sheet */
+#mechView.split .grow[data-t]{cursor:pointer;border-radius:6px}
+#mechView.split .grow[data-t]:hover{background:#f4f4f1}
 .pheat{position:absolute;top:0;right:0;z-index:1;font-size:28px;font-weight:600;min-height:48px;border-width:2px;border-radius:999px;gap:5px;padding:2px 16px 2px 10px;cursor:pointer;letter-spacing:0;text-transform:none}
 #mechView .plate .pheat svg{width:26px;height:26px;min-height:0;display:inline;cursor:pointer}
 #mechView .sec[aria-label=Weapons]{display:none}
@@ -825,6 +866,7 @@ button.hbig{cursor:pointer}
 <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v8M7.2 6.2a7.5 7.5 0 1 0 9.6 0" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
 <symbol id="i-fist" viewBox="0 0 24 24"><path d="M6 10.5V8a1.6 1.6 0 0 1 3.2 0v-.8a1.6 1.6 0 0 1 3.2 0v.3a1.6 1.6 0 0 1 3.2 0v.6a1.6 1.6 0 0 1 3.2 0V14a6.5 6.5 0 0 1-6.5 6.5H11A5 5 0 0 1 6 15.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M6 12.5h4.2a1.6 1.6 0 0 0 0-3.2H8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-sinks" viewBox="0 0 24 24"><path d="M6.5 18q-2.3-1.5 0-3t0-3 0-3 0-3M12 18q-2.3-1.5 0-3t0-3 0-3 0-3M17.5 18q-2.3-1.5 0-3t0-3 0-3 0-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-dmg" viewBox="0 0 24 24"><path d="M12 2l2.4 5.6L20 5l-2.2 5.8L23 12l-5.2 1.4L20 19l-5.6-2.4L12 22l-2.4-5.4L4 19l2.2-5.6L1 12l5.2-1.2L4 5l5.6 2.6z" fill="currentColor"/></symbol>
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs></svg>
 <div class="home" id="home">
@@ -845,6 +887,8 @@ button.hbig{cursor:pointer}
   </div>
 </div>
 <div class="app" id="mechView" hidden>
+ <div class="fsplit" id="fsplit"><button type="button" class="back mclose fsx" id="fsClose" aria-label="Close">×</button>
+ <div class="fpane" id="fpane"><div class="ftabs" id="ftabs" role="group" aria-label="Target"></div>
  <div class="msheet">
   <header>
     <div class="ttl"><h1 id="mechTitle">King Crab <small>KGC-0000</small></h1></div>
@@ -915,6 +959,7 @@ button.hbig{cursor:pointer}
     <details class="mfold"><summary>Damage log <b id="logN"></b></summary><ol class="log" id="log" aria-label="Damage log"></ol></details>
   </aside>
  </div>
+ </div></div>
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -975,6 +1020,12 @@ button.hbig{cursor:pointer}
   <div class="ftotal"><span id="fireSum">Select the weapons fired this turn</span></div>
   <div class="factions" id="fcActs"><button type="button" id="fcHold">Hold fire</button><button type="button" class="primary" id="fcOk">OK</button></div>
   <p class="vnote" id="fcView" hidden>Weapons are fired in the Weapon Attack phase.</p>
+</div>
+<div class="card pcard" id="pdcard" role="dialog" aria-labelledby="pdTitle" hidden>
+  <div class="hd"><h2 id="pdTitle">Apply damage?</h2><button type="button" class="x" id="pdClose" aria-label="Stay in this phase">×</button></div>
+  <p class="vnote" id="pdNote"></p>
+  <div class="pdlist" id="pdList"></div>
+  <div class="factions"><button type="button" id="pdLater">Not yet</button><button type="button" class="primary" id="pdApply">Apply damage</button></div>
 </div>
 <div class="card pcard" id="pacard" role="dialog" aria-labelledby="paTitle" hidden>
   <div class="hd"><h2 id="paTitle">Physical attacks</h2><button type="button" class="x" id="paClose" aria-label="Close">×</button></div>
@@ -1481,9 +1532,27 @@ function useUnit(id){
   if(!state.fired||typeof state.fired!=='object')state.fired={};delete state.fireHeat;
   for(const k of MECH.list)if(!state[k]||!Array.isArray(state[k].crits)||state[k].crits.length!==CRIT[k].length)state[k]={...(state[k]||{}),crits:CRIT[k].map(()=>false)};
 }
-function save(){try{localStorage.setItem(UNITS[unitId].key,JSON.stringify({state,log,showTags}))}catch(e){}}
-const snap=()=>{history.push(JSON.stringify({state,log}));if(history.length>300)history.shift()};
-const mechDead=()=>state.HD.is<=0||state.CT.is<=0;
+function save(){tidyPend();try{localStorage.setItem(UNITS[unitId].key,JSON.stringify({state,log,showTags}))}catch(e){}}
+const snap=()=>{history.push(JSON.stringify({state,log}));if(history.length>300)history.shift();notePend()};
+// ---- damage that takes effect at the end of the phase ----
+// Weapon and physical attacks are simultaneous: damage is recorded as it's rolled, but a 'Mech keeps everything it
+// had at the start of the phase until the damage is applied (when the phase is left, or at the latest the new turn).
+// The first change to a 'Mech in one of those phases keeps a copy of its locations in state.pend[phase]; the checks
+// on what it can do (firing, to-hit penalties, ammo bins, physical attacks, being destroyed) read that copy through
+// AL() while run inside asAble(). Heat, movement and the record sheet itself always read the real damage.
+const PEND_NAMES={weapons:'Weapon Attack',physical:'Physical Attack'};
+const attackPhase=()=>MODE==='battle'&&PEND_NAMES[PH.phase]?PH.phase:null;
+const locsOf=s=>Object.fromEntries(MECH.list.map(k=>[k,{armor:s[k].armor,rear:s[k].rear,is:s[k].is,crits:[...s[k].crits]}]));
+function notePend(){const p=attackPhase();if(!p)return;state.pend=state.pend||{};if(!state.pend[p])state.pend[p]=locsOf(state)}
+// a copy that matches the 'Mech as it is now (nothing hit, or the damage taken back off) isn't waiting for anything
+function tidyPend(){if(!state.pend)return;const now=JSON.stringify(locsOf(state));
+  for(const p of Object.keys(state.pend))if(JSON.stringify(state.pend[p])===now)delete state.pend[p];
+  if(!Object.keys(state.pend).length)delete state.pend}
+let ABLE=0;
+const asAble=f=>{ABLE++;try{return f()}finally{ABLE--}};
+const asReal=f=>{const a=ABLE;ABLE=0;try{return f()}finally{ABLE=a}};
+function AL(k){const p=ABLE&&state.pend&&(state.pend.weapons||state.pend.physical);return p?p[k]:state[k]}
+const mechDead=()=>AL('HD').is<=0||AL('CT').is<=0;
 
 function destroy(k){state[k].armor=0;state[k].is=0;if(state[k].rear!=null)state[k].rear=0;
   const arm=MECH.armOf[k];if(arm&&state[arm].is>0)destroy(arm)}
@@ -1544,16 +1613,35 @@ function mountMech(){
   fills.innerHTML='';$('art').innerHTML=artOf(DATA);$('art').style.strokeWidth=DATA.sw||'';
   svg.setAttribute('viewBox',DATA.viewBox);
   svg.setAttribute('aria-label',`${CH.name} front view coloured by remaining armour. Tap a location to record damage.`);
-  fillEl=buildDrawing(defs,fills,'');
+  // colour the new shapes straight away: SVG shapes start black, and the fill transition (there so damage fades in)
+  // would otherwise fade every freshly opened sheet in from black
+  fillEl=buildDrawing(defs,fills,'');paintDrawing(fillEl);
   $('mechTitle').innerHTML=`${CH.name} <small>${CH.model}</small>`;
   appEl.dataset.house=houseOf(unitId)||'';
   loadHitMap();mounted=unitId;
 }
 // ---- hit map for taps ----
+// the tap map is decoded once per chassis and kept (D.hitPx); willReadFrequently keeps the canvas in ordinary memory,
+// so reading its pixels back doesn't have to wait on the graphics card
 let ix=null,hitData=null;
-function loadHitMap(){ix=DATA.index;hitData=null;const hit=document.createElement('canvas');hit.width=ix.w;hit.height=ix.h;
-  const hImg=new Image(),want=ix;hImg.onload=()=>{if(ix!==want)return;const c=hit.getContext('2d');c.drawImage(hImg,0,0);hitData=c.getImageData(0,0,ix.w,ix.h).data};
-  hImg.src='data:image/png;base64,'+ix.png}
+function hitPxOf(D,done){if(D.hitPx){if(done)done(D.hitPx);return}
+  if(D._hitWait){if(done)D._hitWait.push(done);return}D._hitWait=done?[done]:[];
+  const I=D.index,img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=I.w;c.height=I.h;
+    const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(img,0,0);D.hitPx=g.getImageData(0,0,I.w,I.h).data;
+    const w=D._hitWait;D._hitWait=null;w.forEach(f=>f(D.hitPx))};
+  img.src='data:image/png;base64,'+I.png}
+function loadHitMap(){const D=DATA;ix=D.index;hitData=D.hitPx||null;if(!hitData)hitPxOf(D,px=>{if(ix===D.index)hitData=px})}
+// after the page loads, get every 'Mech's drawing ready in idle moments, one 'Mech at a time, so even the first
+// time a record sheet opens it doesn't wait: the tap map and the location masks are decoded ahead of time
+function warmDrawings(){const list=Object.values(CHASSIS).map(c=>c.data);let i=0;
+  const idle=window.requestIdleCallback?f=>requestIdleCallback(f,{timeout:2000}):f=>setTimeout(f,60);
+  // last of all, lay the record sheet out once while invisible (the first sheet to open otherwise pays for that),
+  // unless something is already open
+  const sheet=()=>{if(!appEl.hidden||!scrim.hidden||mounted!==unitId)return;appEl.style.visibility='hidden';appEl.hidden=false;
+    render();appEl.offsetHeight;requestAnimationFrame(()=>{if(appEl.style.visibility==='hidden'){appEl.hidden=true;appEl.style.visibility=''}})};
+  const step=()=>{const D=list[i++];if(!D)return sheet();artOf(D);hitPxOf(D);
+    Promise.all(Object.values(D.masks).map(m=>{const im=new Image();im.src='data:image/png;base64,'+m.png;return im.decode().catch(()=>{})})).then(()=>idle(step))};
+  idle(step)}
 function locAt(cx,cy){
   if(!hitData)return null;const p=svg.createSVGPoint();p.x=cx;p.y=cy;
   const q=p.matrixTransform(svg.getScreenCTM().inverse()),x=Math.round(q.x-ix.x),y=Math.round(q.y-ix.y);
@@ -1610,7 +1698,7 @@ for(const row of ROWS){
   const [mi,,pl]=d.children;holdable(mi,()=>step(row,-1));holdable(pl,()=>step(row,1));
   $('cRows').append(d);rowEls[row.key]={d,mi,pl,v:d.querySelector('.v'),bar:d.querySelector('.bar i')};
 }
-const lost=(k,i)=>state[k].crits[i]||state[k].is<=0;
+const lost=(k,i)=>{const s=AL(k);return s.crits[i]||s.is<=0};
 function groupHits(g){let h=0;for(const k of MECH.list)CRIT[k].forEach((c,i)=>{if(c.g===g&&lost(k,i))h++});return h}
 function renderCrits(k){
   const s=state[k],slots=CRIT[k],dead=s.is<=0;
@@ -1747,7 +1835,7 @@ $('pcClose').onclick=closePilot;$('wcClose').onclick=closePilot;$('wcDone').oncl
 $('pName').addEventListener('keydown',e=>{if(e.key==='Enter')e.target.blur()});
 scrim.addEventListener('pointerdown',closePilot,true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePilot()});
-const binLost=b=>state[BINS[b].loc].is<=0||groupHits(b)>0;
+const binLost=b=>AL(BINS[b].loc).is<=0||groupHits(b)>0;
 const binLeft=b=>binLost(b)?0:state.ammo[b];
 // a weapon's bins in the order the player set (saved per 'Mech in state.binOrder, keyed by the weapon's bin list)
 const binOrderSet=bins=>!!(state.binOrder&&state.binOrder[bins.join()]);
@@ -1756,7 +1844,7 @@ function orderedBins(bins){const o=(state.binOrder&&state.binOrder[bins.join()])
 // "LT bin", numbered when a weapon has two bins in the same location
 function binLabel(bins,b){const loc=BINS[b].loc,same=bins.filter(x=>BINS[x].loc===loc);return same.length>1?`${loc} bin ${same.indexOf(b)+1}`:`${loc} bin`}
 // to-hit penalty from damaged actuators in the arm a weapon is mounted in
-function armMod(w){if(!w.arm||state[w.arm].is<=0)return 0;if(lostItem(w.arm,'Shoulder'))return 4;return['Upper Arm Actuator','Lower Arm Actuator'].filter(a=>lostItem(w.arm,a)).length}
+function armMod(w){if(!w.arm||AL(w.arm).is<=0)return 0;if(lostItem(w.arm,'Shoulder'))return 4;return['Upper Arm Actuator','Lower Arm Actuator'].filter(a=>lostItem(w.arm,a)).length}
 function weaponMod(w){let m=heatFire(state.heat);const sen=groupHits('sen');if(sen===1)m+=2;
   if(w.arm&&state[w.arm].is>0){if(lostItem(w.arm,'Shoulder'))m+=4;else m+=['Upper Arm Actuator','Lower Arm Actuator'].filter(a=>lostItem(w.arm,a)).length}
   return m}
@@ -1765,7 +1853,8 @@ function renderWeapons(){
   $('wpnBody').innerHTML=WEAPONS.map((w,i)=>{const out=groupHits(w.g)>0||sen>=2;const mod=out?0:weaponMod(w);
     let am='–';if(w.ammo){const left=w.ammo.reduce((a,b)=>a+binLeft(b),0),max=w.ammo.reduce((a,b)=>a+BINS[b].max,0);
       am=`<button type="button" class="ammo${left<=Math.ceil(max/4)?' low':''}" data-w="${i}" aria-label="${w.n} ammo, ${left} left">${left}</button>`}
-    return `<tr class="${out?'out':''}${isFired(i)?' fired':''}"><td>${w.n}${mod?`<span class="mod">+${mod}</span>`:''}</td><td>${w.loc}</td><td>${w.ht}</td><td>${w.dmg}</td><td>${w.min}</td><td>${w.r}</td><td>${am}</td></tr>`}).join('');
+    const pend=out&&!asAble(()=>groupHits(w.g)>0||groupHits('sen')>=2);
+    return `<tr class="${out?'out':''}${isFired(i)?' fired':''}"><td>${w.n}${pend?'<span class="fpend" title="Hit this phase: still fires until the damage is applied">End of phase</span>':''}${mod?`<span class="mod">+${mod}</span>`:''}</td><td>${w.loc}</td><td>${w.ht}</td><td>${w.dmg}</td><td>${w.min}</td><td>${w.r}</td><td>${am}</td></tr>`}).join('');
   $('wpnBody').querySelectorAll('.ammo').forEach(b=>b.onclick=()=>openAmmo(+b.dataset.w));
 }
 const acard=$('acard');let ammoFor=null;
@@ -1783,8 +1872,9 @@ function renderAmmo(){
 $('acClose').onclick=()=>{acard.hidden=true;ammoFor=null;scrim.hidden=true};
 scrim.addEventListener('pointerdown',()=>{if(!acard.hidden){acard.hidden=true;ammoFor=null}},true);
 // ---- heat ----
-const sinksLeft=()=>HEAT_SINKS-CH.sinkGroups.reduce((a,g)=>a+groupHits(g),0);
-const engineHeat=()=>{const e=groupHits('eng');return e>=3?0:e*5};
+// heat always counts this turn's damage: a heat sink lost in the Weapon Attack phase doesn't cool in the Heat phase
+const sinksLeft=()=>asReal(()=>HEAT_SINKS-CH.sinkGroups.reduce((a,g)=>a+groupHits(g),0));
+const engineHeat=()=>asReal(()=>{const e=groupHits('eng');return e>=3?0:e*5});
 const firedHeat=()=>Object.keys(state.fired||{}).reduce((a,i)=>a+(WEAPONS[i]?.ht||0),0);
 const turnHeat=()=>state.heatDone?0:(state.move?.heat||0)+firedHeat()+(state.extraHeat||0);
 const heatColour=h=>h>=26?'#7a0f12':h>=19?'#c4161c':h>=13?'#e8601c':h>=8?'#f2a31b':h>=5?'#e8d23a':'#9bb7c9';
@@ -1833,13 +1923,66 @@ function canFire(i){const w=WEAPONS[i];if(groupHits(w.g)>0||groupHits('sen')>=2)
 // rounds available to a set of bins this turn: what's left plus rounds already spent by weapons ticked earlier this turn
 function ammoAvail(bins){const key=bins.join();let n=bins.reduce((a,b)=>a+binLeft(b),0);
   for(const i of Object.keys(state.fired))if(WEAPONS[i].ammo&&WEAPONS[i].ammo.join()===key&&state.fired[i]!=null)n++;return n}
-function openFire(id){if(typeof id==='string')useUnit(id);closeCard();closePilot();ammoPop=null;ammoEdited=false;fireSel=new Set(Object.keys(state.fired).map(Number));fcard.hidden=false;scrim.hidden=false;renderFire()}
+function openFire(id){if(typeof id==='string')useUnit(id);closeCard();closePilot();ammoPop=null;ammoEdited=false;fireSel=new Set(Object.keys(state.fired).map(Number));fcard.hidden=false;
+  if(fireLocked()||!openSplit())scrim.hidden=false;renderFire()}
 // closing the dialog any way (×, tapping outside) keeps what's ticked, exactly as OK would: no need to press OK
 let firing=false;   // set while commitFire runs, so its own closeFire doesn't commit again
 const fireChanged=()=>{const was=Object.keys(state.fired).map(Number);return was.length!==fireSel.size||was.some(i=>!fireSel.has(i))};
-function closeFire(){if(fcard.hidden)return;
+function closeFire(){if(fcard.hidden)return;useSide('shooter');
   if(!firing&&!fireLocked()&&fireChanged()){commitFire(false);return}
-  fcard.hidden=true;scrim.hidden=true;ammoPop=null;if(ammoEdited){ammoEdited=false;renderHome()}}
+  fcard.hidden=true;scrim.hidden=true;ammoPop=null;if(split)endSplit();if(ammoEdited){ammoEdited=false;if(!firing)renderHome()}}
+// ---- fire with a target: the fire dialog and an enemy's own record sheet, one at a time, in the 'Mech view ----
+// Only one 'Mech is loaded at a time, so the shooter and the target take turns: any tap, key or input inside the fire
+// dialog runs with the shooter loaded, anything else (the sheet, its damage card, pilot and ammo cards) with the target.
+// Each side's 'Mech stays in memory (split.mem), so switching keeps the very same state objects: handlers built for
+// one side (a crit slot, say) still change the right 'Mech after the other side has been used in between.
+let split=null;   // {shooter, target, on: 'shooter' | 'target', mem} while it's open
+let fireScroll=0;   // where the weapons side was scrolled to, put back on "‹ Weapons"
+const lastTarget={};   // shooter → the enemy whose sheet it last showed
+const fsplit=$('fsplit'),fpane=$('fpane'),fcHome=document.createComment('fcard');fcard.before(fcHome);
+function useSide(role){if(!split||split.on===role)return;save();split.mem[unitId]={state,log,history};
+  const id=split[role],m=split.mem[id];
+  if(m){unitId=id;setChassis(UNITS[id].chassis);({state,log,history}=m)}else useUnit(id);
+  split.on=role}
+const asSide=(role,f)=>{const was=split&&split.on;useSide(role);try{f()}finally{if(was)useSide(was)}};
+for(const t of['pointerdown','click','keydown','input','change'])
+  window.addEventListener(t,e=>{if(split)useSide(e.target.closest&&e.target.closest('#fcard')?'shooter':'target')},true);
+// after a tap on the target side, GATOR catches up (a destroyed or shut-down target changes the numbers)
+fpane.addEventListener('click',()=>setTimeout(()=>{if(split&&!fcard.hidden)asSide('shooter',renderGator)}));
+// active enemy 'Mechs of a house, read straight from storage so the loaded 'Mech (and its undo history) is left alone
+function enemies(mine){const out=[];
+  for(const h of Object.keys(ROSTER))if(h!==mine)for(const id of LISTS[h].active){
+    let st=null;try{st=(JSON.parse(localStorage.getItem(UNITS[id].key)||'null')||{}).state}catch(e){}
+    const C=CHASSIS[UNITS[id].chassis];
+    const gone=s=>!!(s&&((s.HD&&s.HD.is<=0)||(s.CT&&s.CT.is<=0))),was=st&&st.pend&&(st.pend.weapons||st.pend.physical);
+    out.push({id,st,n:C.name,m:C.model,dead:gone(was||st),dying:!!was&&gone(st)&&!gone(was)})}
+  return out}
+function openSplit(){
+  const L=enemies(sideOf(unitId)).filter(e=>!e.dead);if(!L.length)return false;
+  const t=L.some(e=>e.id===lastTarget[unitId])?lastTarget[unitId]:L[0].id;
+  split={shooter:unitId,target:t,on:'shooter',mem:{}};
+  fsplit.prepend(fcard);fsplit.classList.remove('sheet');appEl.classList.add('split');
+  appEl.style.visibility='';appEl.hidden=false;document.body.style.overflow='hidden';
+  showTarget(t);return true}
+function showTarget(id,toSheet){
+  useSide('target');closeCard();closeHeatPop();
+  split.target=lastTarget[split.shooter]=id;save();split.mem[unitId]={state,log,history};
+  if(split.mem[id]){unitId=id;setChassis(UNITS[id].chassis);({state,log,history}=split.mem[id])}else useUnit(id);
+  mountMech();render();
+  fpane.scrollTop=0;renderTabs();
+  if(toSheet){fireScroll=fcard.scrollTop;fsplit.classList.add('sheet')}
+  useSide('shooter');renderGator()}
+function renderTabs(){
+  const L=enemies(sideOf(split.shooter)).filter(e=>!e.dead||e.id===split.target);
+  $('ftabs').innerHTML=`<button type="button" class="fback" aria-label="Back to weapons"><span aria-hidden="true">‹</span><svg aria-hidden="true"><use href="#i-fire"/></svg>Weapons</button><span class="lbl">Target</span><div class="ftlist">`+
+    L.map(e=>`<button type="button" data-t="${e.id}" class="${e.id===split.target?'on':''}${e.dead?' dead':''}" aria-pressed="${e.id===split.target}" title="${e.n} ${e.m}">${e.n}</button>`).join('')+'</div>'}
+$('ftabs').addEventListener('click',e=>{const b=e.target.closest('[data-t]');
+  if(b){if(b.dataset.t!==split.target)showTarget(b.dataset.t)}else if(e.target.closest('.fback')){fsplit.classList.remove('sheet');fcard.scrollTop=fireScroll}});
+function endSplit(){
+  useSide('target');closeCard();closeHeatPop();closePilot();useSide('shooter');split=null;
+  appEl.classList.remove('split');fsplit.classList.remove('sheet');fcHome.after(fcard);
+  appEl.hidden=true;document.body.style.overflow='';if(!firing)renderHome()}   // a commit redraws the roster itself next
+$('fsClose').onclick=closeFire;
 // ---- ammo spinner in the fire dialog: − / + per bin the weapon feeds from, up to each bin's capacity ----
 let ammoPop=null,ammoEdited=false;   // weapon index whose spinner is open; whether any bin changed while the dialog was open
 function renderAmmoPop(){
@@ -1892,10 +2035,11 @@ function renderAmmoPop(){
 // (just removed, not re-rendered, so the same tap still lands on whatever it was aimed at, e.g. ticking a weapon)
 fcard.addEventListener('pointerdown',e=>{if(ammoPop!=null&&!e.target.closest('.apop,[data-am]')){ammoPop=null;
   fcard.querySelectorAll('.apop').forEach(x=>x.remove());fcard.querySelectorAll('.famb.on').forEach(x=>x.classList.remove('on'))}});
-function renderFire(){
+function renderFire(){asAble(renderFireNow)}
+function renderFireNow(){
   if(fcard.hidden)return;
   const view=fireLocked();fcard.classList.toggle('view',view);
-  $('fcTitle').textContent=view?'Weapons':'Fire weapons';$('fcLbl').textContent=view?'Weapons':'Weapons fired';
+  $('fcTitle').innerHTML=`<svg aria-hidden="true"><use href="#i-fire"/></svg>${view?'Weapons':'Fire weapons'}`;$('fcLbl').textContent=view?'Weapons':'Weapons fired';
   $('fcActs').hidden=view;$('fcView').hidden=!view;
   renderGator();
   const need={};for(const i of fireSel){const w=WEAPONS[i];if(w.ammo){const k=w.ammo.join();need[k]=(need[k]||0)+1}}
@@ -1911,7 +2055,8 @@ function renderFire(){
       am=`<span class="fst fa famb${left<=2?' low':''}${ammoPop===i?' on':''}" role="button" tabindex="0" data-am="${i}" title="Shots left: tap to change" aria-label="${w.n} ammo, ${Math.max(0,left)} left: change">${Math.max(0,left)}</span>`}
     if(out)return row(w,'aria-disabled="true"',false,'<span class="fbad">No ammo</span>',am);
     if(why&&!on)return row(w,'aria-disabled="true"',false,`<span class="fbad">${why}</span>`,am);
-    return row(w,`data-i="${i}" aria-pressed="${on}"`,on,armMod(w)?`<span class="farm" title="Arm actuator damage">+${armMod(w)}</span>`:'',am)}).join('');
+    const hit=asReal(()=>canFire(i))?'<span class="fpend" title="Hit this phase: still fires, lost when the damage is applied">Hit</span>':'';
+    return row(w,`data-i="${i}" aria-pressed="${on}"`,on,hit+(armMod(w)?`<span class="farm" title="Arm actuator damage">+${armMod(w)}</span>`:''),am)}).join('');
   if(!view)$('fireRows').querySelectorAll('.frow[data-i]').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;fireSel.has(i)?fireSel.delete(i):fireSel.add(i);renderFire()});
   // tap the ammo number to open a spinner for that weapon's bins (works in view-only mode too)
   $('fireRows').querySelectorAll('[data-am]').forEach(a=>{const go=e=>{e.preventDefault();e.stopPropagation();const i=+a.dataset.am;ammoPop=ammoPop===i?null:i;renderFire()};
@@ -1933,14 +2078,14 @@ function gatorChips(){const P=state.pilot,mv=state.move,mm=MOVE_MODES[mv.mode].a
   const c=[ch('G','Gunnery',P.gunnery),ch('A',!mv.done?'Not moved':mv.mode==='none'?'Stood still':`${MOVE_MODES[mv.mode].l} ${mv.hexes}`,'+'+mm,mm)];
   if(hf)c.push(ch('O','Heat','+'+hf,true));if(sn)c.push(ch('O','Sensor hit','+'+sn,true));
   return c.join('')}
-function renderGator(){
-  const mine=sideOf(unitId),base=fireBase(),rows=[];
-  // enemy state is read straight from storage so the current 'Mech (and its undo history) is left alone
-  for(const h of Object.keys(ROSTER))if(h!==mine)for(const id of LISTS[h].active){
-    let st=null;try{st=(JSON.parse(localStorage.getItem(UNITS[id].key)||'null')||{}).state}catch(e){}
-    const C=CHASSIS[UNITS[id].chassis];if(st&&((st.HD&&st.HD.is<=0)||(st.CT&&st.CT.is<=0)))continue;
+function renderGator(){asAble(renderGatorNow)}
+function renderGatorNow(){
+  const base=fireBase(),rows=[];
+  for(const{id,st,n,m,dead,dying}of enemies(sideOf(unitId))){if(dead)continue;
     const mv=(st&&st.move)||{done:false},sd=st&&st.shutdown,t=sd?-4:mv.done?targetMod(mv.mode,mv.hexes):null;
-    rows.push({id,n:C.name,m:C.model,t,mv:sd?'Shut down':!mv.done?'Not moved':mv.mode==='none'?'Still':`${{walk:'Walk',run:'Run',jump:'Jump'}[mv.mode]} ${mv.hexes}`})}
+    rows.push({id,n,m,t,dying,mv:sd?'Shut down':!mv.done?'Not moved':mv.mode==='none'?'Still':`${{walk:'Walk',run:'Run',jump:'Jump'}[mv.mode]} ${mv.hexes}`})}
+  // with a target side, every row (and its arm lines) opens that enemy's sheet
+  const pick=id=>split?` data-t="${id}" role="button" tabindex="0" aria-label="Show ${CHASSIS[UNITS[id].chassis].name}"`:'';
   // a damaged arm only affects its own weapons: one extra line per arm under each enemy, with that arm's penalty added
   const arms=[];WEAPONS.forEach((w,i)=>{const m=armMod(w);if(!m||canFire(i))return;
     const a=arms.find(x=>x.arm===w.arm);if(a){if(!a.names.includes(w.n))a.names.push(w.n)}else arms.push({arm:w.arm,mod:m,names:[w.n]})});
@@ -1948,10 +2093,12 @@ function renderGator(){
   $('fireGator').innerHTML=`<div class="gh"><b>GATOR</b><span class="fchips">${gatorChips()}<span class="fchip"><i>T</i>below</span><span class="fchip"><i>R</i>below</span></span></div>
     <small class="gnote">Shut-down targets are −4 and arm actuator damage gets its own line. Add terrain and anything else on the table yourself.</small>`+
     (rows.length?`<div class="grow gcols" aria-hidden="true"><span>Enemy ’Mech</span><span>Moved</span><span>S +0</span><span>M +2</span><span>L +4</span></div>`+
-    rows.map(r=>{const t=r.t??0;return `<div class="grow"><span class="gn">${r.n}<small>${r.m}</small></span>
+    rows.map(r=>{const t=r.t??0;return `<div class="grow"${pick(r.id)}><span class="gn">${r.n}<small>${r.m}</small>${r.dying?'<em class="gpend" title="Destroyed when this phase’s damage is applied: it still fires and can still be shot">destroyed at end of phase</em>':''}</span>
       <span class="gm">${r.mv} <b>${r.t==null?'+?':r.t<0?r.t:'+'+r.t}</b></span>${[0,2,4].map(x=>cell(base+t+x)).join('')}</div>`+
-      arms.map(a=>`<div class="grow sub"><span class="gn" title="${a.names.join(', ')}">↳ ${a.arm} weapons<small>${a.mod===4?'shoulder':'actuators'}</small></span><span class="gm"><b>+${a.mod}</b></span>${[0,2,4].map(x=>cell(base+t+a.mod+x)).join('')}</div>`).join('')}).join('')
+      arms.map(a=>`<div class="grow sub"${pick(r.id)}><span class="gn" title="${a.names.join(', ')}">↳ ${a.arm} weapons<small>${a.mod===4?'shoulder':'actuators'}</small></span><span class="gm"><b>+${a.mod}</b></span>${[0,2,4].map(x=>cell(base+t+a.mod+x)).join('')}</div>`).join('')}).join('')
     :'<div class="empty">No active enemy ’Mechs.</div>');
+  $('fireGator').querySelectorAll('[data-t]').forEach(r=>{const go=()=>showTarget(r.dataset.t,true);
+    r.onclick=go;r.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
 }
 // take each shot from the bin with the most rounds left, so bins drain evenly
 // Shots come from the fullest bin (so bins drain evenly) until the player drags a bin to the top of the ammo spinner;
@@ -1974,7 +2121,7 @@ function commitFireNow(hold){
     snap();
     // un-ticked weapons give their round back to the bin it came from
     for(const i of removed){const b=state.fired[i];if(b!=null&&BINS[b])state.ammo[b]=Math.min(BINS[b].max,state.ammo[b]+1);delete state.fired[i]}
-    for(const i of added){const w=WEAPONS[i];state.fired[i]=w.ammo?spendShot(w.ammo):null}
+    asAble(()=>{for(const i of added){const w=WEAPONS[i];state.fired[i]=w.ammo?spendShot(w.ammo):null}})
     state.fireDone=done;
     const nm=i=>`${WEAPONS[i].n}${WEAPONS[i].arm?` (${WEAPONS[i].arm})`:''}`;
     log.unshift(hold?'Held fire this turn':fireSel.size?`Fired this turn: ${[...fireSel].sort((a,b)=>a-b).map(nm).join(', ')} (+${firedHeat()} heat)`:'Cleared this turn’s firing');
@@ -2003,12 +2150,12 @@ function physAttacks(){
   // punches, one per arm
   for(const A of['LA','RA']){const nm=MECH.locs[A].name;let no=null;
     const lostAct=['Upper Arm Actuator','Lower Arm Actuator'].filter(a=>!ok(A,a)).length,noHand=!ok(A,'Hand Actuator');
-    if(state[A].is<=0)no='Arm destroyed';else if(lostItem(A,'Shoulder'))no='Shoulder destroyed';
+    if(AL(A).is<=0)no='Arm destroyed';else if(lostItem(A,'Shoulder'))no='Shoulder destroyed';
     else if(jumped)no='Jumped this turn';else if(firedFrom(A))no='Fired an arm weapon';
     const parts=[];if(lostAct)parts.push(`${lostAct===2?'no upper or lower arm':!ok(A,'Upper Arm Actuator')?'no upper arm':'no lower arm'} actuator`);if(noHand)parts.push('no hand');
     out.push({n:'Punch',loc:A,hit:P+mm+2*lostAct+(noHand?1:0),dmg:half(Math.ceil(T/10),lostAct),no,note:parts.length?parts.join(', '):''})}
   // kicks, one per leg (shown once when both legs are the same)
-  const legDead=['LL','RL'].some(L=>state[L].is<=0),kicks=[];
+  const legDead=['LL','RL'].some(L=>AL(L).is<=0),kicks=[];
   for(const L of['LL','RL']){let no=null;
     const lostAct=['Upper Leg Actuator','Lower Leg Actuator'].filter(a=>!ok(L,a)).length,noFoot=!ok(L,'Foot Actuator');
     if(legDead)no='Leg destroyed';else if(['LL','RL'].some(k=>lostItem(k,'Hip')))no='Hip destroyed';
@@ -2022,7 +2169,7 @@ function physAttacks(){
   // only for 'Mechs built with a hand in each arm: without both, it can't hold a club at all
   if(['LA','RA'].every(A=>has(A,'Hand Actuator'))){let no=null;const arms=['LA','RA'];
     const lost=['Upper Arm Actuator','Lower Arm Actuator'].filter(a=>arms.some(A=>!ok(A,a))).length;
-    if(arms.some(A=>state[A].is<=0||lostItem(A,'Shoulder')))no='Needs both arms';
+    if(arms.some(A=>AL(A).is<=0||lostItem(A,'Shoulder')))no='Needs both arms';
     else if(arms.some(A=>!ok(A,'Hand Actuator')))no='Hand destroyed';
     else if(jumped)no='Jumped this turn';else if(firedFrom('LA')||firedFrom('RA'))no='Fired an arm weapon';
     const parts=['Needs a club: a tree, girder or torn-off limb, picked up in an earlier turn'];
@@ -2040,13 +2187,13 @@ function physAttacks(){
       note:`${hx!=null?`${hx} hex${hx===1?'':'es'} moved. `:''}Modified by Piloting difference with the target; takes target tons/10 back`})}
   // push: both arms, shoulders working, no arm weapons fired
   {let no=null;
-    if(['LA','RA'].some(A=>state[A].is<=0||lostItem(A,'Shoulder')))no='Needs both arms';else if(jumped)no='Jumped this turn';
+    if(['LA','RA'].some(A=>AL(A).is<=0||lostItem(A,'Shoulder')))no='Needs both arms';else if(jumped)no='Jumped this turn';
     else if(firedFrom('LA')||firedFrom('RA'))no='Fired an arm weapon';
     out.push({n:'Push',loc:'–',hit:P-1+mm,dmg:'–',no,note:'Moves the target back one hex'})}
   return{out,P,mm,moved,mv}
 }
 function renderPhys(){
-  if(pacard.hidden)return;const{out,P,mm,moved,mv}=physAttacks();
+  if(pacard.hidden)return;const{out,P,mm,moved,mv}=asAble(physAttacks);
   $('paTitle').textContent=`Physical attacks · ${CH.name}`;
   const chips=[`<span class="fchip">Piloting ${P}</span>`,`<span class="fchip${mm?' up':''}">${moved?(mv.mode==='none'?'Stood still':`${MOVE_MODES[mv.mode].l} ${mv.hexes}`):'Not moved'} +${mm}</span>`];
   $('paMods').innerHTML=`<div class="fnum" title="Base physical to-hit: Piloting"><b>${P}+</b><small>Piloting</small></div>
@@ -2059,7 +2206,7 @@ function renderPhys(){
 $('paClose').onclick=closePhys;
 scrim.addEventListener('pointerdown',()=>closePhys(),true);
 
-scrim.addEventListener('pointerdown',()=>{closeFire();if(typeof closeInit==='function'){closeInit();closeHeat();closeRepair();closeChest()}},true);
+scrim.addEventListener('pointerdown',()=>{if(!split)closeFire();if(typeof closeInit==='function'){closeInit();closeHeat();closeRepair();closeChest()}},true);
 
 function renderPilot(){
   const p=state.pilot,dead=p.hits>=6||groupHits('cock')>0||state.HD.is<=0;
@@ -2088,7 +2235,7 @@ function render(){
   }
   if(open){fills.append(fillEl[open].g);if(open!=='HD')fills.append(fillEl.HD.g)}
   renderLocs();
-  $('mechDead').hidden=!mechDead();
+  $('mechDead').hidden=!mechDead();$('mechDead').textContent=asAble(mechDead)?'’Mech destroyed':'’Mech destroyed · takes effect at end of phase';
   $('logN').textContent=log.length||'';
   $('log').innerHTML=log.length?log.map(l=>`<li>${l}</li>`).join(''):'<li>No damage yet. Tap a location to start.</li>';
   renderCritSummary();renderEffects();renderPilot();renderWeapons();renderAmmo();renderHeat();renderCard();save();
@@ -2153,12 +2300,33 @@ const isActive=id=>Object.values(LISTS).some(L=>L.active.includes(id));
 const FOLD_KEY='roster-fold';let FOLD={};try{FOLD=JSON.parse(localStorage.getItem(FOLD_KEY))||{}}catch(e){}
 const saveFold=()=>{try{localStorage.setItem(FOLD_KEY,JSON.stringify(FOLD))}catch(e){}};
 let TURN=null;   // house due to activate a 'Mech next, worked out on each roster render; shown, never enforced
+// The roster is built off-screen, then patched into the page: cards (and list headers) whose content hasn't changed
+// stay exactly where they are, so the browser only lays out and repaints what did change. Rebuilding all 16 cards
+// and their pictures on every update was the main cost of each tap on a tablet.
+function patchRoster(live,next){
+  const a=[...live.children],b=[...next.children];
+  b.forEach((n,i)=>{const o=a[i];
+    if(o&&n.classList.contains('mcard')&&o.dataset.unit===n.dataset.unit){
+      if(o._sig===n._sig)return;
+      // same 'Mech, something changed (a phase change only touches the buttons): swap only the parts that differ,
+      // so the picture stays put unless its own part changed. The grip never changes, so drags keep their card.
+      if(o._parts&&o._parts.length===n._parts.length){const oc=[...o.children],nc=[...n.children];
+        nc.forEach((x,j)=>{if(o._parts[j]!==n._parts[j])oc[j].replaceWith(x)});
+        if(o.className!==n.className)o.className=n.className;o._parts=n._parts;o._sig=n._sig;o._thumb=n._thumb;return}}
+    if(o&&!n.dataset.unit&&n.classList.contains('mcard')&&o.outerHTML===n.outerHTML)return;   // "coming soon" placeholders
+    if(o&&n.classList.contains('zone')&&o.className===n.className&&o.dataset.house===n.dataset.house&&o.dataset.list===n.dataset.list){
+      const oh=o.querySelector('.zhead'),nh=n.querySelector('.zhead');if(oh.outerHTML!==nh.outerHTML)oh.replaceWith(nh);
+      if(o.title!==n.title)o.title=n.title;
+      patchRoster(o.querySelector('.mgrid'),n.querySelector('.mgrid'));return}
+    if(o)o.replaceWith(n);else live.append(n)});
+  for(let i=b.length;i<a.length;i++)a[i].remove();
+}
 function renderHome(){
-  const keep=unitId,fmt=n=>n.toLocaleString('en-GB');
+  const keep=unitId,fmt=n=>n.toLocaleString('en-GB'),patches=[];
   const before=new Map([...document.querySelectorAll('.mcard[data-unit]')].map(c=>[c.dataset.unit,c.getBoundingClientRect()]));
   TURN=MODE==='battle'?turnOrder():null;
   for(const[f,list]of Object.entries(ROSTER)){
-    const box=$('force-'+f);box.innerHTML='';
+    const box=document.createElement('div');patches.push([$('force-'+f),box]);
     // a hidden force shows nothing about its 'Mechs: no cards, no BV totals
     const hid=FOLD['hide-'+f]===true,hb=$('hide-'+f);hb.textContent=hid?'Show':'Hide';hb.setAttribute('aria-pressed',hid);
     hb.title=hid?`Show ${HOUSE_NAME[f]}’s 'Mechs`:`Hide ${HOUSE_NAME[f]}’s 'Mechs from the other player`;
@@ -2186,6 +2354,8 @@ function renderHome(){
         d.innerHTML=`<div class="thumb">Coming soon</div><span class="mn">${u.n}</span><span class="mm">${u.m} · ${u.t} t</span>`;g.append(d)}
     }
   }
+  for(const[live,next]of patches)patchRoster(live,next);
+  for(const s of homeEl.querySelectorAll('.mcard .tslot'))s.replaceWith(s.closest('.mcard')._thumb);   // pictures into new cards
   if(keep)useUnit(keep);
   fitNames();fitThumbs();
   if(MODE==='battle')renderPhase();   // keeps the 'still to move / fire' count current
@@ -2199,7 +2369,10 @@ function renderHome(){
 const MOD_TINTS=['#a6d98a','#cfe8c0','#f1e6a2','#f6cd8f','#f3a983','#ee8f74'];
 function modTint(v,top,on){if(!on)return'';const i=Math.min(v,MOD_TINTS.length-1);   // same value, same colour in both boxes
   return `style="background:${MOD_TINTS[i]};border-color:rgba(0,0,0,.35)"`}
-function buildCard(uid){
+// each card remembers what it showed (_sig, its HTML without the picture), so an unchanged card can be kept as it is
+// (and each part's HTML, _parts: picture-and-name, buttons, grip), so a changed card can swap just the parts that changed
+function buildCard(uid){const c=buildCardNow(uid);c._parts=[...c.children].map(x=>x.outerHTML);c._sig=c.className+'|'+c._parts.join('');return c}
+function buildCardNow(uid){
       useUnit(uid);
       const c=document.createElement('div');c.className='mcard';c.dataset.unit=uid;
       const grip=document.createElement('button');grip.type='button';grip.className='grip';grip.setAttribute('aria-label',`Drag ${CH.name} between Active and Inactive`);
@@ -2207,7 +2380,8 @@ function buildCard(uid){
       const open=document.createElement('button');open.type='button';open.className='mopen';
       open.setAttribute('aria-label',`Open ${CH.name} ${CH.model}`);
       // picture with the heat badge: carried heat, plus this turn's heat still to come
-      const th=document.createElement('div');th.className='thumb';th.append(makeThumb());
+      // the picture goes in after renderHome has worked out which cards changed (see patchRoster): a placeholder for now
+      const th=document.createElement('div');th.className='thumb';c._thumb=makeThumb();th.append(Object.assign(document.createElement('i'),{className:'tslot'}));
       const tt=turnHeat(),h=state.heat,hc=h>=5?heatColour(h):'#fff';
       const hb=document.createElement('span');hb.className='heatb';hb.style.background=hc;hb.style.color=h>=19?'#fff':'#000';
       hb.title=`Heat ${h}${tt?`, +${tt} this turn`:''}`;
@@ -2303,10 +2477,14 @@ function startDrag(e,card){
   grip.addEventListener('pointermove',move);grip.addEventListener('pointerup',end);grip.addEventListener('pointercancel',end);
 }
 // shrink the name + code until the longest one fits on one line; every card uses that size so they match
+// Every check re-lays out the whole roster, so instead of stepping down from the top a size at a time: text width
+// grows with font size, so one measurement at the top size gives a close guess, then a step or two settles it.
 function fitNames(){const els=[...document.querySelectorAll('.minfo .nm')];if(!els.length||homeEl.hidden)return;
-  let s=17;const fits=()=>els.every(el=>el.scrollWidth<=el.clientWidth+0.5);
-  els.forEach(el=>el.style.fontSize=s+'px');
-  while(!fits()&&s>10){s-=0.5;els.forEach(el=>el.style.fontSize=s+'px')}}
+  const TOP=17,MIN=10,fits=()=>els.every(el=>el.scrollWidth<=el.clientWidth+0.5),size=v=>els.forEach(el=>el.style.fontSize=v+'px');
+  size(TOP);const r=Math.min(1,...els.map(el=>el.clientWidth/Math.max(1,el.scrollWidth)));if(r>=1)return;
+  let s=Math.max(MIN,Math.floor(TOP*r*2)/2);size(s);
+  while(s<TOP){size(s+0.5);if(fits())s+=0.5;else{size(s);break}}   // the guess can be half a size small
+  while(s>MIN&&!fits()){s-=0.5;size(s)}}
 // size each roster picture by the 'Mech's drawn height (not its sheet box): the drawing's height is k of the
 // picture's height, centred, feet on the bottom edge; anything too wide for that is shrunk to fit the width
 const THUMB_BOX=new WeakMap();   // picture → its drawing's outline, measured once
@@ -2379,7 +2557,7 @@ function turnOrder(){
   const isDone=PH.phase==='movement'?()=>state.move.done:()=>state.fireDone;
   const keep=unitId,tot={},done={};
   for(const[h,L]of Object.entries(LISTS)){tot[h]=0;done[h]=0;
-    for(const id of L.active){useUnit(id);const d=isDone(),dead=mechStatus().st[0]==='Destroyed';
+    for(const id of L.active){useUnit(id);const d=isDone(),dead=asAble(()=>mechStatus().st[0]==='Destroyed');
       if(d||!dead&&!state.shutdown&&(PH.phase==='movement'||state.move.done)){tot[h]++;if(d)done[h]++}}}   // shut-down 'Mechs don't activate
   if(keep)useUnit(keep);
   const first=Object.keys(HOUSE_NAME).find(h=>h!==PH.init),second=PH.init,rem={...tot},seq=[];
@@ -2395,11 +2573,11 @@ let phArmed=false,phTimer=null;
 function renderPhase(){
   const i=PHASES.findIndex(p=>p[0]===PH.phase);
   const left=PH.phase==='movement'?countWhere(()=>!state.move.done&&!state.shutdown):PH.phase==='weapons'?countWhere(()=>!state.fireDone&&!state.shutdown):0;
-  const loser=PH.init?Object.keys(HOUSE_NAME).find(h=>h!==PH.init):null;
+  const loser=PH.init?Object.keys(HOUSE_NAME).find(h=>h!==PH.init):null,waiting=MODE==='battle'?pendPhases():new Set();
   $('ptrack').innerHTML=PHASES.map(([k,l],j)=>{
     const cls=k==='end'?(j===i||PH.phase==='initiative'?'cur':''):j<i?'past':j===i?'cur':'';   // New turn is lit after Heat, or before the first turn
     const title=k==='end'?'Start a new turn: choose who won initiative (ends this turn: applies heat if needed, clears moves and firing)':'';
-    const lab=l+(j===i&&left?` <i>${left}</i>`:'');
+    const lab=l+(j===i&&left?` <i>${left}</i>`:'')+(waiting.has(k)?'<span class="pdmg" title="Damage waiting to apply"><svg aria-hidden="true"><use href="#i-dmg"/></svg></span>':'');
     return `<button type="button" role="tab" class="${cls}" data-p="${k}" aria-selected="${j===i}" ${title?`title="${title}"`:''}>${lab}</button>`}).join('');
   $('ptrack').querySelectorAll('button').forEach(b=>b.onclick=()=>goPhase(b.dataset.p));
   // the winner's pill beside the house name; tap it to correct the winner without starting a new turn
@@ -2409,13 +2587,54 @@ function renderPhase(){
 }
 function setPhase(p){PH.phase=p;savePhase();renderPhase();renderHome()}
 // tap a phase to go there; only New turn changes anything, and it asks who won initiative first
+// leaving a phase with damage still waiting asks whether to apply it (every time: "Not yet" lets you look at
+// another phase first). New turn doesn't ask: it always applies everything still waiting.
 function goPhase(p){
+  if(p!==PH.phase&&p!=='end'&&pendPhases().has(PH.phase)){openPend([PH.phase],()=>goPhaseNow(p));return}
+  goPhaseNow(p)}
+function goPhaseNow(p){
   switch(p){
     case 'heat':if(PH.phase!=='heat')setPhase('heat');openHeatPhase();break;
     case 'end':openInit(true);break;
     default:setPhase(p);
   }
 }
+// ---- damage waiting: which phases have some, what it does, and applying it ----
+function pendPhases(){if(unitId)save();const s=new Set();
+  for(const id of Object.keys(UNITS)){try{const st=(JSON.parse(localStorage.getItem(UNITS[id].key)||'null')||{}).state;if(st&&st.pend)Object.keys(st.pend).forEach(p=>s.add(p))}catch(e){}}
+  return s}
+// per 'Mech: damage taken, locations and items lost, and the Piloting rolls it calls for (made at the end of the phase)
+function pendSummary(ph){const keep=unitId,rows=[];if(keep)save();
+  for(const id of Object.keys(UNITS)){useUnit(id);const p=state.pend&&state.pend[ph];if(!p)continue;
+    let dmg=0;const gone=[],hits=new Set(),psr=[];
+    for(const k of MECH.list){const a=p[k],b=state[k];dmg+=(a.armor-b.armor)+((a.rear||0)-(b.rear||0))+(a.is-b.is);
+      if(a.is>0&&b.is<=0)gone.push(MECH.locs[k].name);
+      else CRIT[k].forEach((c,i)=>{if(c.g&&!a.crits[i]&&b.crits[i])hits.add(c.n)})}
+    const dead=(state.HD.is<=0||state.CT.is<=0)&&!(p.HD.is<=0||p.CT.is<=0);
+    if(dmg>=20)psr.push('20+ damage');
+    if(hits.has('Gyro'))psr.push('gyro hit');
+    for(const L of['LL','RL'])if(p[L].is>0&&state[L].is<=0)psr.push(`${MECH.locs[L].name.toLowerCase()} destroyed`);
+    for(const n of['Hip','Upper Leg Actuator','Lower Leg Actuator','Foot Actuator'])if(hits.has(n))psr.push(`${n.replace(' Actuator','').toLowerCase()} hit`);
+    rows.push({n:CH.name,m:CH.model,dmg,gone,hits:[...hits],dead,psr:dead?[]:psr})}
+  if(keep)useUnit(keep);return rows}
+function applyPend(phs){const keep=unitId;if(keep)save();
+  for(const id of Object.keys(UNITS)){useUnit(id);if(!state.pend)continue;let did=false;
+    for(const p of phs)if(state.pend[p]){delete state.pend[p];did=true;log.unshift(`${PEND_NAMES[p]} damage applied`)}
+    if(did){if(!Object.keys(state.pend).length)delete state.pend;save()}}
+  if(keep)useUnit(keep)}
+const pdcard=$('pdcard');let pendThen=null,pendFor=[];
+function openPend(phs,then){pendThen=then;pendFor=phs;
+  const rows=phs.flatMap(pendSummary),nm=phs.map(p=>PEND_NAMES[p]).join(' and ');
+  $('pdTitle').textContent=`Apply ${nm} damage?`;
+  $('pdNote').textContent=`Attacks in the ${nm} phase happen at the same time, so this damage hasn’t taken effect yet: until it’s applied, every ’Mech can still fire and attack as it could at the start of the phase. Not yet keeps it waiting, so you can look at another phase first.`;
+  $('pdList').innerHTML=rows.map(r=>`<div class="pdrow"><b>${r.n}</b><small>${r.m}</small><br>${[r.dead?'<em class="bad">Destroyed</em>':'',r.dmg?`${r.dmg} damage`:'',
+    r.gone.length?`${r.gone.join(', ')} destroyed`:'',r.hits.length?`hit: ${r.hits.join(', ')}`:''].filter(Boolean).join(' · ')}${r.psr.length?`<span class="psr">Piloting roll: ${r.psr.join(', ')}</span>`:''}</div>`).join('');
+  pdcard.hidden=false;scrim.hidden=false}
+function closePend(){if(pdcard.hidden)return;pdcard.hidden=true;scrim.hidden=true;pendThen=null}
+const pendGo=apply=>{const f=pendThen;if(apply)applyPend(pendFor);closePend();if(f)f();else{renderPhase();renderHome()}};
+$('pdApply').onclick=()=>pendGo(true);$('pdLater').onclick=()=>pendGo(false);$('pdClose').onclick=closePend;
+scrim.addEventListener('pointerdown',closePend,true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePend()});
 // initiative: New turn asks who won (choosing ends this turn and starts Movement; closing changes nothing);
 // the Initiative pill opens the same picker just to correct the winner, keeping the current phase
 // New turn mid-game asks first ("Start a new turn?"), then the same dialog switches to the winner picker
@@ -2423,7 +2642,7 @@ let iniNew=false;
 function openInit(isNew){iniNew=!!isNew;
   const playing=PH.phase!=='initiative',pending=playing&&countWhere(()=>!state.heatDone),ask=iniNew&&playing;
   $('inTitle').textContent=ask?'Start a new turn?':iniNew?'New turn':'Initiative';
-  $('inAskNote').textContent=(pending?'This turn’s heat hasn’t been applied yet; it will be applied now. ':'')+'Moves, firing and extra heat will be cleared for every active ’Mech.';
+  $('inAskNote').textContent=(pending?'This turn’s heat hasn’t been applied yet; it will be applied now. ':'')+(playing&&pendPhases().size?'Damage still waiting will be applied. ':'')+'Moves, firing and extra heat will be cleared for every active ’Mech.';
   $('inNote').textContent=iniNew?'The loser moves first; then sides alternate.':'Change who won initiative this turn.';
   $('inAsk').hidden=!ask;$('inPick').hidden=ask;
   $('incard').hidden=false;scrim.hidden=false}
@@ -2520,6 +2739,7 @@ scrim.addEventListener('pointerdown',()=>closeSd(),true);
 // new turn: finish the current one (heat if not yet applied, clear moves and firing), record the initiative winner,
 // go to Movement, then ask any shutdown / restart rolls the heat caused. Before the first turn there is nothing to finish.
 function endTurn(winner){
+  applyPend(Object.keys(PEND_NAMES));   // nothing waits past the end of the turn
   const playing=PH.phase!=='initiative',keep=unitId,checks=[];
   if(playing){CAMP.played=true;saveCamp();
     for(const id of activeIds()){useUnit(id);
@@ -2716,16 +2936,17 @@ function doRepair(key){
   ledger(h,`${CH.name} ${CH.model}: ${text} (${cost} SP)`,-w,0,id,prev);
   if(keep)useUnit(keep);renderMode();renderHome();renderRepair()}
 
-function showMech(id){useUnit(id);mountMech();appEl.hidden=false;document.body.style.overflow='hidden';appEl.scrollTop=0;render()}
+function showMech(id){useUnit(id);mountMech();appEl.style.visibility='';appEl.hidden=false;document.body.style.overflow='hidden';appEl.scrollTop=0;render()}
 function showHome(){closeCard();closePilot();closeHeatAdj();closeHeatPop();appEl.hidden=true;document.body.style.overflow='';homeEl.hidden=false;renderHome()}
-appEl.addEventListener('click',e=>{if(e.target===appEl)showHome()});   // tap the dimmed roster behind the sheet to close it
+appEl.addEventListener('click',e=>{if(e.target===appEl)split?closeFire():showHome()});   // tap the dimmed roster behind the sheet to close it
 let escTop=false;   // Escape closes the sheet only when no dialog is open on top of it
 document.addEventListener('keydown',e=>{if(e.key==='Escape')escTop=scrim.hidden&&!open&&$('heatEdit').hidden},true);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&escTop&&!appEl.hidden)showHome()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&escTop&&!appEl.hidden)split?closeFire():showHome()});
 $('backBtn').onclick=showHome;
 
 useUnit('kc1');mountMech();
 render();
+addEventListener('load',warmDrawings);
 renderMode();
 renderHome();
 renderPhase();

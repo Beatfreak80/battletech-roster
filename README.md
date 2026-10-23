@@ -16,8 +16,11 @@ another device.
 python build.py
 ```
 
+`build.py` also simplifies each drawing's line art (`simplify_art.py`) as it goes; the data files keep the original.
+
 Each chassis folder holds its record-sheet drawing and the scripts that turn it into location shapes
-(`render.py`, `seg.py`, `make_data.py`).
+(`render.py`, `seg.py`, `make_data.py`). To add a 'Mech from its SVG drawing, see
+[ADDING-A-MECH.md](ADDING-A-MECH.md).
 
 ## Disclaimer
 
