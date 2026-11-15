@@ -15,9 +15,10 @@ P={
  'LA':[(1290,440),(1400,440),(1400,640),(1290,640)],
  'RL':[(900,615),(1040,615),(1050,645),(1085,645),(1085,760),(1150,760),(1150,990),(1115,990),(1115,1060),(900,1060)],
  'LL':[(1215,640),(1400,640),(1400,1060),(1115,1060),(1115,990),(1150,990),(1150,760),(1215,760)],
- # the body pod: its lower 'chin' with the medium laser lens stays centre torso
- 'CT':[(1108,440),(1205,440),(1205,640),(1215,640),(1215,715),(1185,760),(1085,760),(1085,645),(1108,645)],
- 'HD':[(1125,360),(1195,360),(1195,505),(1125,505)],
+ # the head is the whole round face in the middle of the body: the X-braced dome with its two windows, the lip band
+ # and the chin gun pod under it. The centre torso is everything above it: the tower and aerial.
+ 'CT':[(1125,360),(1195,360),(1195,440),(1205,440),(1205,558),(1108,558),(1108,440),(1125,440)],
+ 'HD':[(1108,558),(1205,558),(1205,640),(1215,640),(1215,715),(1185,760),(1085,760),(1085,645),(1108,645)],
 }
 draw=['RA','RT','LT','LA','RL','LL','CT','HD']   # later shapes overwrite earlier ones
 order=['RA','RT','CT','LT','LA','RL','LL','HD']
@@ -37,6 +38,9 @@ line4=np.array(Image.open('lc4.png').convert('L'))<160
 ext=np.isin(lab,list(border));ext=ndi.binary_dilation(ext,iterations=4)&~line4
 d,(iy,ix)=ndi.distance_transform_edt(assign==0,return_indices=True)
 full=assign[iy,ix];full[ext]=0
+# line pixels inside the head's outline can fill from the centre torso around it: give them to the head
+im=Image.new('L',(W,H),0);ImageDraw.Draw(im).polygon(P['HD'],fill=1)
+full[(np.array(im)==1)&(full==order.index('CT')+1)]=order.index('HD')+1
 cols=[(0,0,0),(230,80,80),(240,160,60),(240,220,60),(80,200,120),(60,160,230),(150,90,220),(220,90,180),(40,40,40)]
 rgb=np.full(a.shape+(3,),255,np.uint8)
 for i in range(1,9):rgb[full==i]=cols[i]

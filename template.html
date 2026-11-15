@@ -147,6 +147,9 @@ section[aria-label="Heat"]{container-type:inline-size}
 .grow .gm b{color:var(--ink)}
 .grow .gv{font-family:var(--mono);font-weight:700;font-size:13px;text-align:center}
 .grow .gv.no{color:var(--muted);font-weight:400}
+.grow.pcols{grid-template-columns:minmax(0,1fr) 92px 44px 64px}
+.grow .gcmp{display:flex;align-items:baseline;justify-content:center;gap:3px}.grow .gcmp small{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+#pacard .fcm{font-family:var(--display);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .grow.sub{border-top:0;min-height:19px}
 .grow.sub .gn{font-weight:500;font-size:12px;color:var(--muted);padding-left:8px}
 .grow.sub .gv{font-size:12.5px;font-weight:600;color:#7a4300}
@@ -371,7 +374,7 @@ h1 small{font-weight:500;color:var(--on-bg);opacity:.75;font-size:.55em;letter-s
 }
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%}
 .mvbtn{min-height:44px;padding:4px 8px;background:var(--ink);color:var(--panel);border-color:var(--ink);display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
-.mvbtn.done{background:#dfe9d6;color:#2f5a1c;border-color:#2f5a1c}
+.mvbtn.done{background:var(--ink);color:var(--panel);border-color:var(--ink)}
 /* ---- compact roster cards: three to a row on a landscape tablet ---- */
 .mgrid{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:8px}
 .mcard{padding:6px;gap:5px;border-radius:7px}
@@ -658,8 +661,13 @@ button{border-radius:8px}
 .zone.active.up{border-color:#3f9a2c;box-shadow:0 0 0 2px #3f9a2c,0 0 18px rgba(63,154,44,.4)}
 .mcard{border:1px solid var(--hair);border-radius:12px;background:#fff;box-shadow:var(--lift-sm)}
 .mcard .thumb{background:linear-gradient(#f7f8f6,#e8eae6);border-radius:8px}
+/* out of the game: diagonal stripes behind the drawing, like a destroyed location's, and a Destroyed label */
+.mcard.out .thumb{background:repeating-linear-gradient(45deg,#d4d7d9 0 9px,#b3b8bd 9px 15px)}
+.mout{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#3b4148;border-radius:999px;padding:2px 9px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;box-shadow:0 1px 4px rgba(0,0,0,.35)}
 .mvbtn:not(.done):not(.off){box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 4px rgba(0,0,0,.25)}
-.mvbtn.done{background:linear-gradient(#eef7e7,#d3e8c4);border-color:#5b8f3c;color:#2f5a1c}
+/* green: ready to use now (its phase, action not taken yet); black: the action is recorded; outlined: not its phase */
+.mvbtn:not(.done):not(.off):not(.shut){background:linear-gradient(#4fa33a 0%,#2f8022 60%,#256b1b 100%);border-color:#1d5715;color:#fff}
+.mvbtn.done{background:var(--ink-grad);border-color:var(--ink);color:var(--panel)}
 .ptrack,.modesw{background:rgba(255,255,255,.55);border:0;border-radius:999px;padding:3px;box-shadow:inset 0 1px 3px rgba(0,0,0,.18)}
 .modesw button{border-radius:999px}
 /* the saves button sits in the same pale inset track as the mode switch, like its unselected option */
@@ -765,9 +773,9 @@ button.hbig{cursor:pointer}
 #mechView.split{display:flex;align-items:center;justify-content:center;overflow:hidden;padding:16px}
 #mechView.split .fsplit{display:flex;position:relative;width:min(580px,100%);max-height:calc(100dvh - 32px);background:var(--panel);border-radius:18px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.3),0 20px 56px rgba(0,0,0,.45)}
 #mechView.split .fsplit.sheet{width:min(640px,100%)}
-#mechView.split #fcard{position:relative;left:auto!important;top:auto!important;transform:none;z-index:auto;flex:1 1 auto;width:auto;max-height:none;min-height:0;overflow:auto;overscroll-behavior:contain;border:0;border-radius:0;box-shadow:none;animation:none}
-#mechView.split .fsplit:not(.sheet) .fpane,#mechView.split .fsplit.sheet #fcard{display:none}
-#mechView.split #fcClose,#mechView.split #backBtn{display:none}
+#mechView.split #fcard,#mechView.split #pacard{position:relative;left:auto!important;top:auto!important;transform:none;z-index:auto;flex:1 1 auto;width:auto;max-height:none;min-height:0;overflow:auto;overscroll-behavior:contain;border:0;border-radius:0;box-shadow:none;animation:none}
+#mechView.split .fsplit:not(.sheet) .fpane,#mechView.split .fsplit.sheet #fcard,#mechView.split .fsplit.sheet #pacard{display:none}
+#mechView.split #fcClose,#mechView.split #paClose,#mechView.split #backBtn{display:none}
 #mechView.split .fpane{display:block;flex:1 1 auto;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain}
 #mechView.split .msheet{max-width:none;margin:0;border-radius:0;box-shadow:none}
 #mechView.split .fsx{display:grid;place-items:center;position:absolute;top:12px;right:14px;z-index:3}
@@ -799,6 +807,24 @@ button.hbig{cursor:pointer}
 #mechView.split .grow[data-t]:hover{background:#f4f4f1}
 .pheat{position:absolute;top:0;right:0;z-index:1;font-size:28px;font-weight:600;min-height:48px;border-width:2px;border-radius:999px;gap:5px;padding:2px 16px 2px 10px;cursor:pointer;letter-spacing:0;text-transform:none}
 #mechView .plate .pheat svg{width:26px;height:26px;min-height:0;display:inline;cursor:pointer}
+/* hit-location picker: a pill like the heat button, split three ways: left side, front/rear (one table for both),
+   right side; the pressed one lays that attack's 2D6 hit-location rolls over the drawing */
+.hdir{position:absolute;top:0;left:0;z-index:1;display:flex;min-height:48px;border:2px solid #000;border-radius:999px;background:#fff;overflow:hidden}
+.hdir button{min-height:0;min-width:0;border:0;border-radius:0;margin:0;padding:0 6px;background:transparent;color:#000;font-family:var(--mono);font-size:20px;font-weight:600;letter-spacing:0;text-transform:none;line-height:1}
+.hdir button:first-child{padding-left:12px}.hdir button:last-child{padding-right:12px}
+.hdir button+button{border-left:2px solid #000}
+.hdir button:hover{background:#eef0f2}
+.hdir button[aria-pressed=true]{background:var(--ink-grad);color:#fff}
+/* beside a physical attack: which table, under the direction pill */
+.hdir.htab{top:56px;min-height:40px}.hdir.htab[hidden]{display:none}
+.hdir.htab button{font-family:var(--display);font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:0 9px}
+/* a natural 2 is left off the drawing (it would crowd the 7 on most 'Mechs) and noted under it instead */
+.hcrit{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px auto 8px;font-size:14px;line-height:1.3;color:var(--ink)}
+.hcrit[hidden]{display:none}
+.hcrit b{font-family:var(--mono);font-size:26px;font-weight:600;color:#ffd24a;-webkit-text-stroke:5px #000;paint-order:stroke fill;line-height:1;flex:none}
+@media (max-width:600px){.hcrit{font-size:13px}}
+#hitNums{pointer-events:none}
+#hitNums text{font-family:var(--mono);font-weight:600;fill:#ffd24a;stroke:#000;paint-order:stroke;stroke-linejoin:round;text-anchor:middle;dominant-baseline:central}
 #mechView .sec[aria-label=Weapons]{display:none}
 #heatEdit #heatFx{flex:1;min-width:0}
 #heatEdit .heq{grid-template-columns:1.4fr auto 1.7fr auto .8fr auto .8fr}
@@ -909,6 +935,10 @@ button.hbig{cursor:pointer}
 
   <section class="plate" aria-label="Damage diagram">
     <button type="button" class="heatb pheat" id="plateHeat" aria-label="Heat: tap for details"></button>
+    <div class="hdir" id="hitDir" role="group" aria-label="Show hit locations for an attack from">
+      <button type="button" data-d="L" aria-pressed="false" title="Left side" aria-label="Left side">L</button><button type="button" data-d="F" aria-pressed="false" title="Front or rear" aria-label="Front or rear">F/R</button><button type="button" data-d="R" aria-pressed="false" title="Right side" aria-label="Right side">R</button>
+    </div>
+    <div class="hdir htab" id="hitTab" role="group" aria-label="Hit location table" hidden><button type="button" data-t="punch" aria-pressed="false" title="Punch table: punches, death from above">Punch</button><button type="button" data-t="kick" aria-pressed="false" title="Kick table">Kick</button><button type="button" data-t="std" aria-pressed="false" title="Standard table: clubs, charges">Std</button></div>
     <svg id="mech" viewBox="330 0 1230 1060" preserveAspectRatio="xMidYMin meet" role="img" aria-label="King Crab front view coloured by remaining armour. Tap a location to record damage.">
       <defs id="defs">
         <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
@@ -920,7 +950,9 @@ button.hbig{cursor:pointer}
       </defs>
       <g id="fills"></g>
       <g id="art"></g>
+      <g id="hitNums"></g>
     </svg>
+    <div class="hcrit" id="hitCrit" hidden></div>
     <div class="under">
       <div class="locs" id="locs"></div>
       <div class="ledit" id="card" role="group" aria-labelledby="cName" hidden>
@@ -1029,7 +1061,7 @@ button.hbig{cursor:pointer}
 </div>
 <div class="card pcard" id="pacard" role="dialog" aria-labelledby="paTitle" hidden>
   <div class="hd"><h2 id="paTitle">Physical attacks</h2><button type="button" class="x" id="paClose" aria-label="Close">×</button></div>
-  <div class="fmods" id="paMods"></div>
+  <div class="gator" id="paMods"></div>
   <div class="frows" id="paRows"></div>
   <p class="vnote" id="paNote"></p>
 </div>
@@ -1553,6 +1585,9 @@ const asAble=f=>{ABLE++;try{return f()}finally{ABLE--}};
 const asReal=f=>{const a=ABLE;ABLE=0;try{return f()}finally{ABLE=a}};
 function AL(k){const p=ABLE&&state.pend&&(state.pend.weapons||state.pend.physical);return p?p[k]:state[k]}
 const mechDead=()=>AL('HD').is<=0||AL('CT').is<=0;
+// out of the game: head or centre torso gone, or the MechWarrior killed. Damage still waiting in an attack phase
+// doesn't count yet (attacks are simultaneous), so a 'Mech shot to pieces this phase still fires back.
+const unitOut=()=>asAble(mechDead)||state.pilot.hits>=6;
 
 function destroy(k){state[k].armor=0;state[k].is=0;if(state[k].rear!=null)state[k].rear=0;
   const arm=MECH.armOf[k];if(arm&&state[arm].is>0)destroy(arm)}
@@ -1601,7 +1636,8 @@ function buildDrawing(defsEl,fillsEl,prefix){
 }
 function paintDrawing(els){for(const k of MECH.list){const p=paintFor(k);els[k].pb.style.fill=p.base;els[k].ps.style.fill=p.stripe}}
 const svg=$('mech');
-let fills=$('fills'),fillEl={},mounted=null;
+let fills=$('fills'),fillEl={},mounted=null,shownData=null;   // shownData: the drawing on the sheet now (in the fire
+// dialog the loaded 'Mech switches back to the shooter while the target's drawing stays on screen)
 // The drawing data is thousands of separate <polyline>s. Joined into one <path> (a subpath per line) it draws exactly
 // the same (opaque stroke, no fill, round caps and joins) but is one element instead of thousands, which keeps the
 // page light: worked out once per chassis, the first time its drawing is shown.
@@ -1618,7 +1654,7 @@ function mountMech(){
   fillEl=buildDrawing(defs,fills,'');paintDrawing(fillEl);
   $('mechTitle').innerHTML=`${CH.name} <small>${CH.model}</small>`;
   appEl.dataset.house=houseOf(unitId)||'';
-  loadHitMap();mounted=unitId;
+  loadHitMap();mounted=unitId;shownData=DATA;renderHitNums();
 }
 // ---- hit map for taps ----
 // the tap map is decoded once per chassis and kept (D.hitPx); willReadFrequently keeps the canvas in ordinary memory,
@@ -1649,6 +1685,92 @@ function locAt(cx,cy){
     if(xx<0||yy<0||xx>=ix.w||yy>=ix.h)continue;const v=hitData[(yy*ix.w+xx)*4];if(v)return DATA.order[Math.round(v/20)-1]}
   return null;
 }
+// ---- hit-location rolls, by attack direction (front and rear share a column; a rear attack hits rear armour) ----
+// std: the standard 2D6 table (weapons, clubs, charges); a natural 2 also rolls for a critical hit.
+// punch (punches, death from above) and kick: the 1D6 physical attack tables. BattleTech Core Rulebook (2026): the
+// Punch table is the older one reversed so its pattern matches the standard table (arms on the low rolls); the Kick
+// table is unchanged.
+const HIT_TABLES={
+  std:{first:2,crit:true,
+    F:['CT','RA','RA','RL','RT','CT','LT','LL','LA','LA','HD'],
+    L:['LT','LL','LA','LA','LL','LT','CT','RT','RA','RL','HD'],
+    R:['RT','RL','RA','RA','RL','RT','CT','LT','LA','LL','HD']},
+  punch:{first:1,F:['RA','RT','CT','LT','LA','HD'],L:['LA','LA','CT','LT','LT','HD'],R:['RA','RA','CT','RT','RT','HD']},
+  kick:{first:1,F:['RL','RL','RL','LL','LL','LL'],L:['LL','LL','LL','LL','LL','LL'],R:['RL','RL','RL','RL','RL','RL']}};
+let hitDir=null;   // 'F' (front/rear), 'L', 'R' or null: off
+let hitTable='std';   // which table: 'std', or 'punch' / 'kick' (offered beside a physical attack)
+// where each location's numbers can go: every few pixels inside it, with how far that point is from the location's
+// edge (a two-pass chamfer distance over the tap map), worked out once per chassis
+function hitLabelsOf(D){
+  if(D.hitLab||!D.hitPx)return D.hitLab||null;
+  const{w,h,x:ox,y:oy}=D.index,px=D.hitPx,lab=new Uint8Array(w*h),d=new Uint16Array(w*h);
+  for(let i=0;i<w*h;i++){lab[i]=Math.round(px[i*4]/20);d[i]=lab[i]?65535:0}
+  const nb=(i,xx,yy,c)=>{if(xx<0||yy<0||xx>=w||yy>=h)return c;const n=yy*w+xx;return(lab[n]===lab[i]?d[n]:0)+c};
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(!lab[i])continue;
+    d[i]=Math.min(d[i],nb(i,x-1,y,3),nb(i,x,y-1,3),nb(i,x-1,y-1,4),nb(i,x+1,y-1,4))}
+  const cand={};
+  for(let y=h-1;y>=0;y--)for(let x=w-1;x>=0;x--){const i=y*w+x;if(!lab[i])continue;
+    d[i]=Math.min(d[i],nb(i,x+1,y,3),nb(i,x,y+1,3),nb(i,x+1,y+1,4),nb(i,x-1,y+1,4));
+    const k=D.order[lab[i]-1];if(k&&!(x%5)&&!(y%5))(cand[k]=cand[k]||[]).push([x+ox,y+oy,d[i]/3])}
+  return D.hitLab=cand;
+}
+function renderHitNums(){
+  const g=$('hitNums');g.innerHTML='';
+  for(const b of document.querySelectorAll('#hitDir button'))b.setAttribute('aria-pressed',String(b.dataset.d===hitDir));
+  // the table picker shows beside a physical attack only
+  const tb=$('hitTab');tb.hidden=!(split&&split.card===pacard);
+  for(const b of tb.querySelectorAll('button'))b.setAttribute('aria-pressed',String(!!hitDir&&b.dataset.t===hitTable));
+  const T=HIT_TABLES[hitTable],cn=$('hitCrit');cn.hidden=!hitDir||!T.crit;if(!hitDir)return;
+  cn.innerHTML=`<b>2</b><span><strong>${LOC_NAMES[T[hitDir][0]]}</strong> and a possible critical hit: roll for one even if armour remains</span>`;
+  const D=shownData,L=hitLabelsOf(D);
+  if(!L){hitPxOf(D,()=>{if(D===shownData)renderHitNums()});return}
+  // on the standard table 3 to 12 go on the drawing and the 2 goes in the note under it; a 1D6 table shows 1 to 6
+  const by={};T[hitDir].forEach((k,i)=>{const r=i+T.first;if(!(T.crit&&r===2))(by[k]=by[k]||[]).push(r)});
+  // the numbers keep one on-screen size whatever the drawing's scale (a light 'Mech's drawing is zoomed in, a heavy
+  // one's zoomed out): pixels are turned into drawing units through the drawing's current scale
+  const sc=svg.getScreenCTM()?.a;if(!sc)return;   // not laid out yet: the resize observer below draws them once it is
+  const fs=Math.min(36,Math.max(24,svg.getBoundingClientRect().width*.07))/sc;
+  // a location hit on more than one roll has them stacked one above the other, which keeps labels narrow.
+  // Each label goes at the point inside its location that sits deepest in the shape (no deeper than half the label's
+  // height counts) without overlapping a label already placed. Left and right partners (arms, torsos, legs) are placed
+  // together on one level where they can be: a step between them costs about half its height in depth.
+  // (three or more in a row, as on the Kick table, read as one range: 1–3, 1–6)
+  const lab={};for(const k in by){const r=by[k],run=r.length>2&&r.every((v,i)=>!i||v===r[i-1]+1);
+    const parts=run?[`${r[0]}–${r[r.length-1]}`]:r.map(String),ch=Math.max(...parts.map(s=>s.length));
+    lab[k]={k,parts,w:(ch*.62+.4)*fs,h:(parts.length*1.05+.25)*fs}}
+  // the buttons sit over the drawing's top-left corner: keep numbers out from under them
+  const placed=[],m=svg.getScreenCTM();
+  for(const el of[$('hitDir'),tb]){const br=el.getBoundingClientRect();if(!br.width)continue;
+    const x0=(br.left-m.e)/sc,y0=(br.top-m.f)/sc;placed.push({x:x0+br.width/sc/2,y:y0+br.height/sc/2,w:br.width/sc,h:br.height/sc})}
+  // the best spot on each row of the location: y → [score, x]
+  // leg numbers stay at knee height or above (the top half of the leg), off the shins and feet
+  const rows=lb=>{const r=new Map(),C=L[lb.k]||[];let lo=Infinity;
+    if(lb.k==='RL'||lb.k==='LL'){let y0=Infinity,y1=-Infinity;for(const c of C){y0=Math.min(y0,c[1]);y1=Math.max(y1,c[1])}lo=(y0+y1)/2}
+    for(const[x,y,dd]of C){if(y>lo)continue;
+      let over=0;for(const q of placed)over+=Math.max(0,Math.min(x+lb.w/2,q.x+q.w/2)-Math.max(x-lb.w/2,q.x-q.w/2))*Math.max(0,Math.min(y+lb.h/2,q.y+q.h/2)-Math.max(y-lb.h/2,q.y-q.h/2));
+      const s=Math.min(dd,lb.h/2)+dd*.02-over*20/fs,o=r.get(y);if(!o||s>o[0])r.set(y,[s,x])}
+    return r};
+  const best=r=>{let b=null;for(const[y,[s,x]]of r)if(!b||s>b[0])b=[s,x,y];return b};
+  const put=(lb,p)=>{if(!p)p=D.anchors[lb.k];if(!p)return;placed.push({x:p[0],y:p[1],w:lb.w,h:lb.h});
+    const t=mk('text',{'font-size':fs,'stroke-width':fs*.22});
+    lb.parts.forEach((s,i)=>{const sp=mk('tspan',{x:p[0],y:p[1]+(i-(lb.parts.length-1)/2)*fs*1.05});sp.textContent=s;t.append(sp)});
+    g.append(t)};
+  // widest first: the long labels have the fewest places to go
+  const groups=[['RA','LA'],['RT','LT'],['RL','LL'],['CT'],['HD']].map(ks=>ks.filter(k=>lab[k])).filter(ks=>ks.length)
+    .sort((a,b)=>Math.max(...b.map(k=>lab[k].w))-Math.max(...a.map(k=>lab[k].w)));
+  for(const ks of groups){
+    if(ks.length===1){const b=best(rows(lab[ks[0]]));put(lab[ks[0]],b&&[b[1],b[2]]);continue}
+    const[A,B]=ks.map(k=>lab[k]),ra=rows(A),rb=rows(B);let top=null;
+    for(const[ya,[sa,xa]]of ra)for(const[yb,[sb,xb]]of rb){const s=sa+sb-Math.abs(ya-yb)*.5;if(!top||s>top[0])top=[s,xa,ya,xb,yb]}
+    if(!top){put(A,null);put(B,null);continue}
+    put(A,[top[1],top[2]]);put(B,[top[3],top[4]]);
+  }
+}
+new ResizeObserver(()=>{if(hitDir)renderHitNums()}).observe(svg);
+$('hitTab').addEventListener('click',e=>{const b=e.target.closest('button[data-t]');if(!b)return;
+  hitTable=b.dataset.t;if(!hitDir)hitDir='F';renderHitNums()});
+$('hitDir').addEventListener('click',e=>{const b=e.target.closest('button[data-d]');if(!b)return;
+  hitDir=hitDir===b.dataset.d?null:b.dataset.d;renderHitNums()});
 function anchorScreen(k){const[x,y]=DATA.anchors[k],p=svg.createSVGPoint();p.x=x;p.y=y;const q=p.matrixTransform(svg.getScreenCTM());return[q.x,q.y]}
 svg.addEventListener('click',e=>{const k=locAt(e.clientX,e.clientY);if(k)openCard(k,e.clientX,e.clientY);else{closeCard();closeHeatPop()}});
 
@@ -1916,15 +2038,16 @@ $('xPlus').onclick=()=>{snap();state.extraHeat=(state.extraHeat||0)+1;render();r
 const fcard=$('fcard');let fireSel=new Set();
 // Battle mode: weapons can only be fired in the weapon attack phase and moves chosen in the movement phase;
 // outside them the dialogs still open, view only, so you can check a 'Mech's weapons and moves
-const fireLocked=()=>MODE==='battle'&&PH.phase!=='weapons';
-const moveLocked=()=>MODE==='battle'&&PH.phase!=='movement';
+// view only: outside the phase, or the 'Mech is out of the game (its weapons and moves can still be looked at)
+const fireLocked=()=>MODE==='battle'&&PH.phase!=='weapons'||unitOut();
+const moveLocked=()=>MODE==='battle'&&PH.phase!=='movement'||unitOut();
 const isFired=i=>Object.prototype.hasOwnProperty.call(state.fired,i);
 function canFire(i){const w=WEAPONS[i];if(groupHits(w.g)>0||groupHits('sen')>=2)return'Destroyed';return null}
 // rounds available to a set of bins this turn: what's left plus rounds already spent by weapons ticked earlier this turn
 function ammoAvail(bins){const key=bins.join();let n=bins.reduce((a,b)=>a+binLeft(b),0);
   for(const i of Object.keys(state.fired))if(WEAPONS[i].ammo&&WEAPONS[i].ammo.join()===key&&state.fired[i]!=null)n++;return n}
 function openFire(id){if(typeof id==='string')useUnit(id);closeCard();closePilot();ammoPop=null;ammoEdited=false;fireSel=new Set(Object.keys(state.fired).map(Number));fcard.hidden=false;
-  if(fireLocked()||!openSplit())scrim.hidden=false;renderFire()}
+  if(fireLocked()||!openSplit(fcard))scrim.hidden=false;renderFire()}
 // closing the dialog any way (×, tapping outside) keeps what's ticked, exactly as OK would: no need to press OK
 let firing=false;   // set while commitFire runs, so its own closeFire doesn't commit again
 const fireChanged=()=>{const was=Object.keys(state.fired).map(Number);return was.length!==fireSel.size||was.some(i=>!fireSel.has(i))};
@@ -1936,19 +2059,20 @@ function closeFire(){if(fcard.hidden)return;useSide('shooter');
 // dialog runs with the shooter loaded, anything else (the sheet, its damage card, pilot and ammo cards) with the target.
 // Each side's 'Mech stays in memory (split.mem), so switching keeps the very same state objects: handlers built for
 // one side (a crit slot, say) still change the right 'Mech after the other side has been used in between.
-let split=null;   // {shooter, target, on: 'shooter' | 'target', mem} while it's open
-let fireScroll=0;   // where the weapons side was scrolled to, put back on "‹ Weapons"
+let split=null;   // {shooter, target, on: 'shooter' | 'target', mem, card: the fire or physical attack dialog} while it's open
+let fireScroll=0;   // where the dialog side was scrolled to, put back on "‹ Weapons" / "‹ Attacks"
 const lastTarget={};   // shooter → the enemy whose sheet it last showed
-const fsplit=$('fsplit'),fpane=$('fpane'),fcHome=document.createComment('fcard');fcard.before(fcHome);
+const fsplit=$('fsplit'),fpane=$('fpane'),cardHome=new Map([fcard,$('pacard')].map(c=>{const h=document.createComment(c.id);c.before(h);return[c,h]}));
 function useSide(role){if(!split||split.on===role)return;save();split.mem[unitId]={state,log,history};
   const id=split[role],m=split.mem[id];
   if(m){unitId=id;setChassis(UNITS[id].chassis);({state,log,history}=m)}else useUnit(id);
   split.on=role}
 const asSide=(role,f)=>{const was=split&&split.on;useSide(role);try{f()}finally{if(was)useSide(was)}};
 for(const t of['pointerdown','click','keydown','input','change'])
-  window.addEventListener(t,e=>{if(split)useSide(e.target.closest&&e.target.closest('#fcard')?'shooter':'target')},true);
+  window.addEventListener(t,e=>{if(split)useSide(e.target.closest&&e.target.closest('#fcard,#pacard')?'shooter':'target')},true);
 // after a tap on the target side, GATOR catches up (a destroyed or shut-down target changes the numbers)
-fpane.addEventListener('click',()=>setTimeout(()=>{if(split&&!fcard.hidden)asSide('shooter',renderGator)}));
+fpane.addEventListener('click',()=>setTimeout(()=>{if(split&&!split.card.hidden)asSide('shooter',renderSplitGator)}));
+const renderSplitGator=()=>split&&split.card===pacard?renderPhys():renderGator();
 // active enemy 'Mechs of a house, read straight from storage so the loaded 'Mech (and its undo history) is left alone
 function enemies(mine){const out=[];
   for(const h of Object.keys(ROSTER))if(h!==mine)for(const id of LISTS[h].active){
@@ -1957,11 +2081,14 @@ function enemies(mine){const out=[];
     const gone=s=>!!(s&&((s.HD&&s.HD.is<=0)||(s.CT&&s.CT.is<=0))),was=st&&st.pend&&(st.pend.weapons||st.pend.physical);
     out.push({id,st,n:C.name,m:C.model,dead:gone(was||st),dying:!!was&&gone(st)&&!gone(was)})}
   return out}
-function openSplit(){
+function openSplit(card){
   const L=enemies(sideOf(unitId)).filter(e=>!e.dead);if(!L.length)return false;
   const t=L.some(e=>e.id===lastTarget[unitId])?lastTarget[unitId]:L[0].id;
-  split={shooter:unitId,target:t,on:'shooter',mem:{}};
-  fsplit.prepend(fcard);fsplit.classList.remove('sheet');appEl.classList.add('split');
+  split={shooter:unitId,target:t,on:'shooter',mem:{},card};
+  // attacking, the chart is wanted: front/rear to start (on the Punch table for a physical attack), kept across
+  // targets until the dialog closes
+  hitDir='F';hitTable=card===pacard?'punch':'std';
+  fsplit.prepend(card);fsplit.classList.remove('sheet');appEl.classList.add('split');
   appEl.style.visibility='';appEl.hidden=false;document.body.style.overflow='hidden';
   showTarget(t);return true}
 function showTarget(id,toSheet){
@@ -1970,19 +2097,20 @@ function showTarget(id,toSheet){
   if(split.mem[id]){unitId=id;setChassis(UNITS[id].chassis);({state,log,history}=split.mem[id])}else useUnit(id);
   mountMech();render();
   fpane.scrollTop=0;renderTabs();
-  if(toSheet){fireScroll=fcard.scrollTop;fsplit.classList.add('sheet')}
-  useSide('shooter');renderGator()}
+  if(toSheet){fireScroll=split.card.scrollTop;fsplit.classList.add('sheet')}
+  useSide('shooter');renderSplitGator()}
 function renderTabs(){
   const L=enemies(sideOf(split.shooter)).filter(e=>!e.dead||e.id===split.target);
-  $('ftabs').innerHTML=`<button type="button" class="fback" aria-label="Back to weapons"><span aria-hidden="true">‹</span><svg aria-hidden="true"><use href="#i-fire"/></svg>Weapons</button><span class="lbl">Target</span><div class="ftlist">`+
+  const ph=split.card===pacard;
+  $('ftabs').innerHTML=`<button type="button" class="fback" aria-label="Back to ${ph?'attacks':'weapons'}"><span aria-hidden="true">‹</span><svg aria-hidden="true"><use href="#i-${ph?'fist':'fire'}"/></svg>${ph?'Attacks':'Weapons'}</button><span class="lbl">Target</span><div class="ftlist">`+
     L.map(e=>`<button type="button" data-t="${e.id}" class="${e.id===split.target?'on':''}${e.dead?' dead':''}" aria-pressed="${e.id===split.target}" title="${e.n} ${e.m}">${e.n}</button>`).join('')+'</div>'}
 $('ftabs').addEventListener('click',e=>{const b=e.target.closest('[data-t]');
-  if(b){if(b.dataset.t!==split.target)showTarget(b.dataset.t)}else if(e.target.closest('.fback')){fsplit.classList.remove('sheet');fcard.scrollTop=fireScroll}});
+  if(b){if(b.dataset.t!==split.target)showTarget(b.dataset.t)}else if(e.target.closest('.fback')){fsplit.classList.remove('sheet');split.card.scrollTop=fireScroll}});
 function endSplit(){
-  useSide('target');closeCard();closeHeatPop();closePilot();useSide('shooter');split=null;
-  appEl.classList.remove('split');fsplit.classList.remove('sheet');fcHome.after(fcard);
+  const card=split.card;useSide('target');closeCard();closeHeatPop();closePilot();useSide('shooter');split=null;hitDir=null;hitTable='std';renderHitNums();
+  appEl.classList.remove('split');fsplit.classList.remove('sheet');cardHome.get(card).after(card);
   appEl.hidden=true;document.body.style.overflow='';if(!firing)renderHome()}   // a commit redraws the roster itself next
-$('fsClose').onclick=closeFire;
+$('fsClose').onclick=()=>split&&split.card===pacard?closePhys():closeFire();
 // ---- ammo spinner in the fire dialog: − / + per bin the weapon feeds from, up to each bin's capacity ----
 let ammoPop=null,ammoEdited=false;   // weapon index whose spinner is open; whether any bin changed while the dialog was open
 function renderAmmoPop(){
@@ -2040,7 +2168,7 @@ function renderFireNow(){
   if(fcard.hidden)return;
   const view=fireLocked();fcard.classList.toggle('view',view);
   $('fcTitle').innerHTML=`<svg aria-hidden="true"><use href="#i-fire"/></svg>${view?'Weapons':'Fire weapons'}`;$('fcLbl').textContent=view?'Weapons':'Weapons fired';
-  $('fcActs').hidden=view;$('fcView').hidden=!view;
+  $('fcActs').hidden=view;$('fcView').hidden=!view;$('fcView').textContent=unitOut()?'This ’Mech is destroyed: it can’t fire.':'Weapons are fired in the Weapon Attack phase.';
   renderGator();
   const need={};for(const i of fireSel){const w=WEAPONS[i];if(w.ammo){const k=w.ammo.join();need[k]=(need[k]||0)+1}}
   const tick='<svg aria-hidden="true"><use href="#i-check"/></svg>',flame='<svg aria-hidden="true"><use href="#i-heat"/></svg>';
@@ -2134,13 +2262,18 @@ $('fcClose').onclick=closeFire;
 // ---- physical attacks (Physical Attack phase): what each attack would do, from tonnage, actuators and this turn's move ----
 // Damage (Total Warfare): punch tons/10 up, halved for each missing or destroyed upper / lower arm actuator (rounded down);
 // kick tons/5 up, halved likewise for upper / lower leg actuators; club tons/5 up, halved likewise (needs both hands); death from above tons/10 × 3 up; charge tons/10 × (hexes − 1) up.
-// To-hit starts from Piloting: punch +0 (+1 no hand, +2 per upper / lower arm actuator), kick −2 (+2 per upper / lower leg,
-// +1 foot), push −1, club −1; punch, kick, club and push add the attacker's movement modifier, charge and death from above don't.
+// To-hit starts from Piloting (BattleTech Core Rulebook, 2026): punch −1 (+1 no hand, +2 per upper / lower arm actuator),
+// kick −1 (+2 per upper / lower leg, +1 foot), push −1, club −1; punch, kick, club and push add the attacker's movement
+// modifier. Charge and death from above don't: they take the comparative modifier instead (attacker's Piloting minus
+// the target's; an immobile target counts as Piloting 4).
 // A 'Mech that jumped can only make a death from above; an arm (or leg) that fired a weapon this turn can't punch (or kick).
 // From memory of the rules: check the rulebook for edge cases.
 const pacard=$('pacard');
-function openPhys(id){if(typeof id==='string')useUnit(id);closeCard();pacard.hidden=false;scrim.hidden=false;renderPhys()}
-function closePhys(){if(pacard.hidden)return;pacard.hidden=true;scrim.hidden=true}
+// in the Physical Attack phase the dialog opens beside an enemy's sheet, as the fire dialog does
+const physLocked=()=>MODE==='battle'&&PH.phase!=='physical'||unitOut();
+function openPhys(id){if(typeof id==='string')useUnit(id);closeCard();closePilot();pacard.hidden=false;
+  if(physLocked()||!openSplit(pacard))scrim.hidden=false;renderPhys()}
+function closePhys(){if(pacard.hidden)return;useSide('shooter');pacard.hidden=true;scrim.hidden=true;if(split)endSplit()}
 function physAttacks(){
   const T=CH.tons,P=state.pilot.piloting,mv=state.move,moved=mv.done,jumped=moved&&mv.mode==='jump',mm=moved?MOVE_MODES[mv.mode].a:0;
   const has=(k,n)=>CRIT[k].some(c=>c.n===n),ok=(k,n)=>has(k,n)&&!lostItem(k,n);
@@ -2153,7 +2286,7 @@ function physAttacks(){
     if(AL(A).is<=0)no='Arm destroyed';else if(lostItem(A,'Shoulder'))no='Shoulder destroyed';
     else if(jumped)no='Jumped this turn';else if(firedFrom(A))no='Fired an arm weapon';
     const parts=[];if(lostAct)parts.push(`${lostAct===2?'no upper or lower arm':!ok(A,'Upper Arm Actuator')?'no upper arm':'no lower arm'} actuator`);if(noHand)parts.push('no hand');
-    out.push({n:'Punch',loc:A,hit:P+mm+2*lostAct+(noHand?1:0),dmg:half(Math.ceil(T/10),lostAct),no,note:parts.length?parts.join(', '):''})}
+    out.push({n:'Punch',loc:A,hit:P-1+mm+2*lostAct+(noHand?1:0),dmg:half(Math.ceil(T/10),lostAct),no,note:parts.length?parts.join(', '):''})}
   // kicks, one per leg (shown once when both legs are the same)
   const legDead=['LL','RL'].some(L=>AL(L).is<=0),kicks=[];
   for(const L of['LL','RL']){let no=null;
@@ -2161,7 +2294,7 @@ function physAttacks(){
     if(legDead)no='Leg destroyed';else if(['LL','RL'].some(k=>lostItem(k,'Hip')))no='Hip destroyed';
     else if(jumped)no='Jumped this turn';else if(firedFrom(L))no='Fired a leg weapon';
     const parts=[];if(lostAct)parts.push(`${lostAct} leg actuator${lostAct>1?'s':''} lost`);if(noFoot)parts.push('foot lost');
-    kicks.push({n:'Kick',loc:L,hit:P-2+mm+2*lostAct+(noFoot?1:0),dmg:half(Math.ceil(T/5),lostAct),no,note:parts.join(', ')})}
+    kicks.push({n:'Kick',loc:L,hit:P-1+mm+2*lostAct+(noFoot?1:0),dmg:half(Math.ceil(T/5),lostAct),no,note:parts.join(', ')})}
   const same=(a,b)=>a.hit===b.hit&&a.dmg===b.dmg&&a.no===b.no&&a.note===b.note;
   if(same(kicks[0],kicks[1]))out.push({...kicks[0],loc:'–'});else out.push(...kicks);
   // club (a tree, girder or torn-off limb): swung with both hands, tons/5 up; like a punch, each missing or destroyed
@@ -2178,13 +2311,13 @@ function physAttacks(){
   // death from above: only for 'Mechs with jump jets
   if(BASE_MP.jump>0){const E=effects();let no=null;
     if(legDead)no='Leg destroyed';else if(E.jump<=0)no='No jump MP';else if(moved&&!jumped)no='Didn’t jump';
-    out.push({n:'Death From Above',loc:'–',hit:P,dmg:Math.ceil(T/10*3),no,note:`Jump onto the target. Takes ${Math.ceil(T/5)} to the legs (as kicks), then a Piloting roll; a miss means a fall`})}
+    out.push({n:'Death From Above',loc:'–',hit:P,cmp:true,dmg:Math.ceil(T/10*3),no,note:`Jump onto the target. Takes ${Math.ceil(T/5)} to the legs (as kicks), then a Piloting roll; a miss means a fall`})}
   // charge: needs a walk or run into the target's hex
   {let no=null,dmg,hx=null;
     if(jumped)no='Jumped this turn';else if(moved&&(mv.mode==='none'||mv.hexes<2))no=mv.mode==='none'?'Didn’t move':'Moved 1 hex';
     if(moved&&!jumped&&mv.mode!=='none'){hx=mv.hexes;dmg=Math.ceil(T/10*Math.max(0,hx-1))}
-    out.push({n:'Charge',loc:'–',hit:P,dmg:dmg??`${Math.ceil(T/10)}×(hexes−1)`,no,
-      note:`${hx!=null?`${hx} hex${hx===1?'':'es'} moved. `:''}Modified by Piloting difference with the target; takes target tons/10 back`})}
+    out.push({n:'Charge',loc:'–',hit:P,cmp:true,dmg:dmg??`${Math.ceil(T/10)}×(hexes−1)`,no,
+      note:`${hx!=null?`${hx} hex${hx===1?'':'es'} moved. `:''}Takes target tons/10 back`})}
   // push: both arms, shoulders working, no arm weapons fired
   {let no=null;
     if(['LA','RA'].some(A=>AL(A).is<=0||lostItem(A,'Shoulder')))no='Needs both arms';else if(jumped)no='Jumped this turn';
@@ -2192,16 +2325,37 @@ function physAttacks(){
     out.push({n:'Push',loc:'–',hit:P-1+mm,dmg:'–',no,note:'Moves the target back one hex'})}
   return{out,P,mm,moved,mv}
 }
-function renderPhys(){
-  if(pacard.hidden)return;const{out,P,mm,moved,mv}=asAble(physAttacks);
+function renderPhys(){asAble(renderPhysNow)}
+// GATOR for physical attacks: the base (Piloting + attacker movement + target movement) for each enemy, and for a
+// charge or death from above Piloting + target movement + the comparative modifier. Each attack row shows only its
+// own modifier, to add to the enemy's number.
+function renderPhysNow(){
+  if(pacard.hidden)return;const{out,P,mm,moved,mv}=physAttacks(),dead=unitOut();if(dead)for(const a of out)a.no='’Mech destroyed';
   $('paTitle').textContent=`Physical attacks · ${CH.name}`;
-  const chips=[`<span class="fchip">Piloting ${P}</span>`,`<span class="fchip${mm?' up':''}">${moved?(mv.mode==='none'?'Stood still':`${MOVE_MODES[mv.mode].l} ${mv.hexes}`):'Not moved'} +${mm}</span>`];
-  $('paMods').innerHTML=`<div class="fnum" title="Base physical to-hit: Piloting"><b>${P}+</b><small>Piloting</small></div>
-    <div class="fparts"><div class="fchips">${chips.join('')}</div><span class="note">To-hit below includes actuators and, for punches, kicks, clubs and pushes, this ’Mech’s movement. Then add the target’s movement and terrain.</span></div>`;
-  $('paRows').innerHTML=`<div class="fcols" aria-hidden="true"><span>Type</span><span>Loc</span><span>To-hit</span><span>Dmg</span></div>`+
-    out.map(a=>`<div class="frow${a.no?' no':''}"><span class="fn"><span>${a.n}${a.no?` <span class="fbad">${a.no}</span>`:''}</span>${a.note?`<small>${a.note}</small>`:''}</span>
-      <span class="floc">${a.loc}</span><span class="fst">${a.no?'–':`${a.hit}+`}</span><span class="fst">${typeof a.dmg==='number'?`<b>${a.dmg}</b>`:a.dmg}</span></div>`).join('');
-  $('paNote').textContent='Each ’Mech makes one physical attack a turn; punching with both arms counts as one. Charge and death from above are declared in the Movement phase.';
+  const ch=(l,tx,v,up)=>`<span class="fchip${up?' up':''}"><i>${l}</i>${tx} ${v}</span>`;
+  const chips=[ch('P','Piloting',P),ch('A',!moved?'Not moved':mv.mode==='none'?'Stood still':`${MOVE_MODES[mv.mode].l} ${mv.hexes}`,'+'+mm,mm)];
+  const rows=[];
+  for(const{id,st,n,m,dead:gone,dying}of enemies(sideOf(unitId))){if(gone)continue;
+    const tm=(st&&st.move)||{done:false},sd=st&&st.shutdown,t=sd?-4:tm.done?targetMod(tm.mode,tm.hexes):null;
+    const tp=sd?4:st&&st.pilot?st.pilot.piloting:5;   // comparative modifier: an immobile target counts as Piloting 4
+    rows.push({id,n,m,t,dying,cmp:P-tp,tp,mv:sd?'Shut down':!tm.done?'Not moved':tm.mode==='none'?'Still':`${{walk:'Walk',run:'Run',jump:'Jump'}[tm.mode]} ${tm.hexes}`})}
+  const pick=id=>split?` data-t="${id}" role="button" tabindex="0" aria-label="Show ${CHASSIS[UNITS[id].chassis].name}"`:'';
+  const cell=v=>v>12?'<span class="gv no" title="Can’t hit (over 12)">–</span>':`<span class="gv">${Math.max(2,v)}+</span>`;
+  const sg=v=>v<0?`−${-v}`:`+${v}`;
+  $('paMods').innerHTML=`<div class="gh"><b>GATOR</b><span class="fchips">${chips.join('')}<span class="fchip"><i>T</i>below</span></span></div>
+    <small class="gnote">Base is Piloting + this ’Mech’s and the target’s movement: add each attack’s modifier below. Charge and death from above use their own column (no attacker movement; Piloting difference with the target instead). Add terrain yourself.</small>`+
+    (rows.length?`<div class="grow pcols gcols" aria-hidden="true"><span>Enemy ’Mech</span><span>Moved</span><span>Base</span><span>Chg/DFA</span></div>`+
+    rows.map(r=>{const t=r.t??0;return `<div class="grow pcols"${pick(r.id)}><span class="gn">${r.n}<small>${r.m}</small>${r.dying?'<em class="gpend" title="Destroyed when this phase’s damage is applied: it can still be attacked">destroyed at end of phase</em>':''}</span>
+      <span class="gm">${r.mv} <b>${r.t==null?'+?':sg(r.t)}</b></span>${cell(P+mm+t)}<span class="gcmp" title="Piloting ${P} + target movement, ${sg(r.cmp)} for Piloting ${P} against ${r.tp}">${cell(P+t+r.cmp)}<small>${sg(r.cmp)} plt</small></span></div>`}).join('')
+    :'<div class="empty">No active enemy ’Mechs.</div>');
+  $('paMods').querySelectorAll('[data-t]').forEach(r=>{const go=()=>showTarget(r.dataset.t,true);
+    r.onclick=go;r.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
+  // each attack's modifier against the Base column (charge and death from above: their own column)
+  $('paRows').innerHTML=`<div class="fcols" aria-hidden="true"><span>Type</span><span>Loc</span><span>Mod</span><span>Dmg</span></div>`+
+    out.map(a=>{const mod=a.no?'–':a.cmp?'<span class="fcm" title="Use the Chg/DFA column">Chg/DFA</span>':sg(a.hit-P-mm);
+      return `<div class="frow${a.no?' no':''}"><span class="fn"><span>${a.n}${a.no?` <span class="fbad">${a.no}</span>`:''}</span>${a.note?`<small>${a.note}</small>`:''}</span>
+      <span class="floc">${a.loc}</span><span class="fst">${mod}</span><span class="fst">${typeof a.dmg==='number'?`<b>${a.dmg}</b>`:a.dmg}</span></div>`}).join('');
+  $('paNote').textContent=dead?'This ’Mech is destroyed: it makes no physical attacks.':'Each ’Mech makes one physical attack a turn; punching with both arms counts as one. Charge and death from above are declared in the Movement phase. Punches and death from above hit on the Punch table, kicks on the Kick table, clubs and charges on the standard table.';
 }
 $('paClose').onclick=closePhys;
 scrim.addEventListener('pointerdown',()=>closePhys(),true);
@@ -2374,7 +2528,7 @@ function modTint(v,top,on){if(!on)return'';const i=Math.min(v,MOD_TINTS.length-1
 function buildCard(uid){const c=buildCardNow(uid);c._parts=[...c.children].map(x=>x.outerHTML);c._sig=c.className+'|'+c._parts.join('');return c}
 function buildCardNow(uid){
       useUnit(uid);
-      const c=document.createElement('div');c.className='mcard';c.dataset.unit=uid;
+      const out=unitOut(),c=document.createElement('div');c.className='mcard'+(out?' out':'');c.dataset.unit=uid;
       const grip=document.createElement('button');grip.type='button';grip.className='grip';grip.setAttribute('aria-label',`Drag ${CH.name} between Active and Inactive`);
       grip.innerHTML='<svg aria-hidden="true"><use href="#i-grip"/></svg>';grip.addEventListener('pointerdown',e=>startDrag(e,c));
       const open=document.createElement('button');open.type='button';open.className='mopen';
@@ -2392,6 +2546,7 @@ function buildCardNow(uid){
       hsT.innerHTML=`<svg aria-hidden="true"><use href="#i-sinks"/></svg>${hsL<HEAT_SINKS?`${hsL}/${HEAT_SINKS}`:HEAT_SINKS}`;
       const top=document.createElement('span');top.className='htop';top.append(hb,hsT);
       th.append(top);
+      if(out)th.insertAdjacentHTML('beforeend','<span class="mout">Destroyed</span>');   // over the middle of the picture
       // tonnage and skill-adjusted BV in the bottom corners of the picture
       const bv=skillBV(CH.bv,state.pilot.gunnery,state.pilot.piloting);
       th.insertAdjacentHTML('beforeend',`<span class="ctags"><span class="ctag" title="${CH.tons} tons"><svg aria-hidden="true"><use href="#i-tons"/></svg>${CH.tons}</span><span class="ctag" title="Battle Value (base ${CH.bv.toLocaleString('en-GB')} × pilot skill)"><svg aria-hidden="true"><use href="#i-bv"/></svg>${bv}</span></span>`);
@@ -2404,7 +2559,7 @@ function buildCardNow(uid){
       pil.addEventListener('click',e=>{e.stopPropagation();useUnit(uid);mountMech();$('wEdit').click()});
       const mv=state.move,mm=MOVE_MODES[mv.mode],nf=Object.keys(state.fired).length;
       // shutdown check (tap to record the roll) and ammo-explosion warning
-      const sdx=sdCheck(),am=heatCheck(h,'Ammo');
+      const sdx=!out&&sdCheck(),am=!out&&heatCheck(h,'Ammo');   // a destroyed 'Mech makes no heat rolls
       const row=document.createElement('div');row.className='mrow';
       row.innerHTML=`${sdx&&!state.shutdown?`<button type="button" class="mwarn sdbtn${sdx.done?' ok':''}">${sdx.done?(state.sdWas?'✓ Restarted':'✓ Shutdown avoided'):sdx.auto?'Shutdown: automatic (30+)':`Shutdown check: ${sdx.n}+`}</button>`:''}
         ${am?`<span class="mwarn" title="Heat phase: roll 2D6; below the number, the ammunition explodes">${am}</span>`:''}
@@ -2415,15 +2570,15 @@ function buildCardNow(uid){
       // once moved, the button carries both modifiers: crosshair = firing modifier from movement, shield = to-be-hit
       const tm=targetMod(mv.mode,mv.hexes);
       const chip=(ic,v,t)=>`<span class="mvmod" title="${t}" ${modTint(v,0,true)}>${ICON(ic)}<span class="vh">${t} </span>+${v}</span>`;
-      const mb=document.createElement('button');mb.type='button';mb.className='mvbtn'+(mv.done?' done mv2':PH.phase!=='movement'?' off':'');
+      const mb=document.createElement('button');mb.type='button';mb.className='mvbtn'+(mv.done?' done mv2':PH.phase!=='movement'||out?' off':'');
       mb.innerHTML=mv.done?`<span class="mvl">${ICON('check')}${mvLbl}</span><span class="mvm">${chip('fire',mm.a,'Firing modifier')}${chip('shield',tm,'To be hit')}</span>`
         :(()=>{const E=effects(false,heatBeforeMove());   // before moving: walk / run / jump available now (after heat and damage)
           return `<span class="mvl">${ICON('move')}Move</span><span class="mvm mpw"><span class="mvsub mp" title="Walk ${E.walk} / Run ${E.run} / Jump ${E.jump}">${E.walk}/${E.run}/${E.jump}</span></span>`})();
       if(!mv.done)mb.classList.add('mv2');mb.onclick=()=>openMove(uid);
-      const fb=document.createElement('button');fb.type='button';fb.className='mvbtn'+(state.fireDone?' done':PH.phase!=='weapons'?' off':'');
+      const fb=document.createElement('button');fb.type='button';fb.className='mvbtn'+(state.fireDone?' done':PH.phase!=='weapons'||out?' off':'');
       fb.innerHTML=state.fireDone?`${ICON('check')}${nf?'Fired':'Held'}`:`${ICON('fire')}Fire`;fb.onclick=()=>openFire(uid);
       // outside their phase (Battle mode) Move and Fire still open, view only
-      if(state.shutdown){
+      if(state.shutdown&&!out){
         // shut down: no moving or attacking; one status button in place of Move/Fire, which opens the restart check
         const sb=document.createElement('button');sb.type='button';sb.className='mvbtn shut mv2';
         const rx=sdCheck();
@@ -2431,13 +2586,13 @@ function buildCardNow(uid){
         sb.title='Shut down: cannot move, fire or make physical attacks; attackers get −4 (immobile target)';sb.onclick=()=>openSd(uid);
         row.querySelector('.acts').append(sb)}
       else if(MODE==='battle'&&PH.phase==='physical'){
-        const ab=document.createElement('button');ab.type='button';ab.className='mvbtn';
+        const ab=document.createElement('button');ab.type='button';ab.className='mvbtn'+(out?' off':'');
         ab.innerHTML=`${ICON('fist')}Attack`;ab.onclick=()=>openPhys(uid);row.querySelector('.acts').append(mb,ab)}
       else row.querySelector('.acts').append(mb,fb);
       if(MODE==='between'){
         const cd=condition();
         const br=document.createElement('div');br.className='mrow brow';
-        // damage amounts don't change repair costs and the picture shows the damage, so only "truly destroyed" is called out
+        // the picture shows the damage and the repair dialog its cost, so only "truly destroyed" is called out
         if(cd.dead)br.innerHTML='<div class="cond"><span class="bad">Truly destroyed</span></div>';
         const rb=document.createElement('button');rb.type='button';rb.className='mvbtn rpopen';rb.innerHTML='Repair &amp; refit';rb.onclick=()=>openRepair(uid);
         const okAll=!cd.dead&&!needsStructure()&&!needsArmour()&&!armourBlocked().length&&!cd.bins.some(binNeeds);
@@ -2513,7 +2668,7 @@ function renderMove(){
   $('mvTitle').textContent=`Move · ${CH.name}`;
   const btn=(n,mode,cap)=>`<button type="button" class="hx ${mode}" data-n="${n}" data-m="${mode}" aria-pressed="${cur.done&&(cur.mode===mode&&cur.hexes===n||(n===0&&cur.mode==='none'))}"><span>${n}</span><small>${cap}</small></button>`;
   const view=moveLocked();
-  $('mvUndoWrap').hidden=!cur.done||view;$('mvView').hidden=!view;$('mvLbl').textContent=view?'Hexes it can move':'Hexes moved';$('mvJLbl').textContent=view?'Jump':'Jumped';   // once a move is recorded, it can be taken back as if the 'Mech hadn't activated
+  $('mvUndoWrap').hidden=!cur.done||view;$('mvView').hidden=!view;$('mvView').textContent=unitOut()?'This ’Mech is destroyed: it can’t move.':'Moves are chosen in the Movement phase.';$('mvLbl').textContent=view?'Hexes it can move':'Hexes moved';$('mvJLbl').textContent=view?'Jump':'Jumped';   // once a move is recorded, it can be taken back as if the 'Mech hadn't activated
   // show every distance the undamaged 'Mech could cover; grey out the ones lost to heat or damage
   const baseRun=Math.ceil(BASE_MP.walk*1.5),noHeat=effects(true);
   let g=btn(0,'none','Still');
@@ -2549,21 +2704,24 @@ const savePhase=()=>{try{localStorage.setItem(PHASE_KEY,JSON.stringify(PH))}catc
 const activeIds=()=>Object.values(LISTS).flatMap(L=>L.active);
 const countWhere=f=>{const keep=unitId;let n=0;for(const id of activeIds()){useUnit(id);if(f())n++}if(keep)useUnit(keep);return n};
 // ---- whose turn to activate a 'Mech (movement and weapon attack phases) ----
-// The initiative loser goes first, then the sides alternate. Unequal numbers: at the start of each round of alternation
-// the side with more 'Mechs still to act activates (its count ÷ the other side's, rounded down) for each one the other side does.
-// Destroyed 'Mechs sit out movement; in the weapon attack phase anything that moved still fires (attacks are simultaneous).
+// BattleTech Core Rulebook (2026), front-loaded initiative: the initiative loser goes first, then the sides alternate.
+// Unequal numbers: before each pair of activations, the side with more 'Mechs still to act activates
+// (its count ÷ the other side's, rounded up) for the other side's one, so its extra 'Mechs go early, not at the end.
+// It's the rulebook's counters, dealt one at a time down a column for the smaller side: 3 against 8 is 3, 3, 2.
+// Destroyed, shut-down and unconscious-pilot 'Mechs take no selections. A 'Mech destroyed during the weapon attack
+// phase still fires (asAble reads it as it was: attacks are simultaneous).
+const canAct=()=>!asAble(()=>mechStatus().st[0]==='Destroyed')&&!state.shutdown&&!state.pilot.uncon;
 function turnOrder(){
   if(!PH.init||(PH.phase!=='movement'&&PH.phase!=='weapons'))return null;
   const isDone=PH.phase==='movement'?()=>state.move.done:()=>state.fireDone;
   const keep=unitId,tot={},done={};
   for(const[h,L]of Object.entries(LISTS)){tot[h]=0;done[h]=0;
-    for(const id of L.active){useUnit(id);const d=isDone(),dead=asAble(()=>mechStatus().st[0]==='Destroyed');
-      if(d||!dead&&!state.shutdown&&(PH.phase==='movement'||state.move.done)){tot[h]++;if(d)done[h]++}}}   // shut-down 'Mechs don't activate
+    for(const id of L.active){useUnit(id);const d=isDone();if(d||canAct()){tot[h]++;if(d)done[h]++}}}
   if(keep)useUnit(keep);
   const first=Object.keys(HOUSE_NAME).find(h=>h!==PH.init),second=PH.init,rem={...tot},seq=[];
   while(rem[first]+rem[second]>0){
     const a=rem[first],b=rem[second];
-    const na=!b?a:a>b?Math.floor(a/b):Math.min(a,1),nb=!a?b:b>a?Math.floor(b/a):Math.min(b,1);
+    const na=!b?a:a>b?Math.ceil(a/b):Math.min(a,1),nb=!a?b:b>a?Math.ceil(b/a):Math.min(b,1);
     for(let i=0;i<na;i++)seq.push(first);for(let i=0;i<nb;i++)seq.push(second);rem[first]-=na;rem[second]-=nb}
   // walk the sequence, using up activations already made; the first one not yet made is whose turn it is
   const used={[first]:0,[second]:0};
@@ -2572,7 +2730,7 @@ function turnOrder(){
 let phArmed=false,phTimer=null;
 function renderPhase(){
   const i=PHASES.findIndex(p=>p[0]===PH.phase);
-  const left=PH.phase==='movement'?countWhere(()=>!state.move.done&&!state.shutdown):PH.phase==='weapons'?countWhere(()=>!state.fireDone&&!state.shutdown):0;
+  const left=PH.phase==='movement'?countWhere(()=>!state.move.done&&canAct()):PH.phase==='weapons'?countWhere(()=>!state.fireDone&&canAct()):0;
   const loser=PH.init?Object.keys(HOUSE_NAME).find(h=>h!==PH.init):null,waiting=MODE==='battle'?pendPhases():new Set();
   $('ptrack').innerHTML=PHASES.map(([k,l],j)=>{
     const cls=k==='end'?(j===i||PH.phase==='initiative'?'cur':''):j<i?'past':j===i?'cur':'';   // New turn is lit after Heat, or before the first turn
@@ -2769,8 +2927,11 @@ for(const h of ['kurita','davion']){const C=CAMP[h];if(C&&C.sp>0){const w=wpFor(
 // Force max BV: the most BV each side may field (campaign setting, 10,000 for our campaign); roster percentages use it
 const maxBV=()=>CAMP.maxBV||10000;
 const fmtN=n=>n.toLocaleString('en-GB');
-// SP Activity Cost Table
-const COST={armour:t=>t,structure:t=>t*2,rearm:5,gunnery:200,piloting:150};
+// SP Activity Cost Table. Armour (tons) and structure (tons × 2) are the cost of a full rebuild: a repair pays that
+// cost's share for the points it puts back (f, 0 to 1), rounded up to whole SP and at least 1 SP. Critical hits are
+// fixed with the structure at no extra cost.
+const share=(full,f)=>Math.max(1,Math.ceil(round2(full*f)));
+const COST={armour:(t,f)=>share(t,f),structure:(t,f)=>share(t*2,f),rearm:5,gunnery:200,piloting:150};
 function ledger(h,text,dwp,dsp,unit,prev){CAMP.ledger.push({h,text,dwp,dsp,unit,prev,at:Date.now()});if(CAMP.ledger.length>200)CAMP.ledger.shift();saveCamp()}
 // condition of the current unit
 function condition(){
@@ -2780,6 +2941,11 @@ function condition(){
   return{a,am,s,sm,cr,ammo,amax,bins,dead:state.CT.is<=0}}
 function needsStructure(){return MECH.list.some(k=>state[k].is<MECH.locs[k].is||state[k].crits.some(Boolean))}
 function needsArmour(){return MECH.list.some(k=>state[k].is>=MECH.locs[k].is&&(state[k].armor<MECH.locs[k].armor||(MECH.locs[k].rear!=null&&state[k].rear<MECH.locs[k].rear)))}
+// points a repair puts back: all missing structure (a lost location counts in full), and the missing armour, front and
+// rear, of locations whose structure is whole (armour isn't restored over damaged structure)
+const structureToFix=()=>MECH.list.reduce((n,k)=>n+MECH.locs[k].is-Math.max(0,state[k].is),0);
+const armourToFix=()=>MECH.list.reduce((n,k)=>{const m=MECH.locs[k],st=state[k];if(st.is<m.is)return n;
+  return n+m.armor-st.armor+(m.rear!=null?m.rear-st.rear:0)},0);
 const armourBlocked=()=>MECH.list.filter(k=>state[k].is<MECH.locs[k].is&&(state[k].armor<MECH.locs[k].armor||(MECH.locs[k].rear!=null&&state[k].rear<MECH.locs[k].rear)));
 const binNeeds=b=>!binLost(b)&&state.ammo[b]<BINS[b].max;
 // 'Mechs left out of the battle (Inactive) pay triple to train
@@ -2911,32 +3077,44 @@ function renderRepair(){
   const blocked=armourBlocked();
   if(c.dead){add('x','Repair internal structure','Centre torso destroyed: this ’Mech is truly destroyed',0,'Cannot be repaired')}
   else{
-    add('structure','Repair internal structure',needsStructure()?`All structure${c.cr?` and ${c.cr} critical hit${c.cr===1?'':'s'}`:''}, including lost locations`:'No structure damage',COST.structure(tons),needsStructure()?'':'Nothing to repair');
-    add('armour','Repair armour',!needsArmour()&&!blocked.length?'No armour damage':blocked.length?`Not restored where structure is damaged: ${blocked.join(', ')}`:'All armour, front and rear',COST.armour(tons),needsArmour()?'':blocked.length?'Repair structure first':'Nothing to repair');
+    const sFix=structureToFix(),aFix=armourToFix(),pts=(n,of,what)=>`${n} of ${of} ${what} points (${Math.round(n/of*100)}%)`;
+    add('structure','Repair internal structure',needsStructure()?[sFix?pts(sFix,c.sm,'structure'):'',c.cr?`${c.cr} critical hit${c.cr===1?'':'s'}`:'',
+        MECH.list.some(k=>state[k].is<=0)?'lost locations included':''].filter(Boolean).join(' · '):'No structure damage',
+      needsStructure()?COST.structure(tons,sFix/c.sm):0,needsStructure()?'':'Nothing to repair');
+    const bl=blocked.length?`Not restored where structure is damaged: ${blocked.join(', ')}`:'';
+    add('armour','Repair armour',needsArmour()?[pts(aFix,c.am,'armour'),bl].filter(Boolean).join(' · '):bl||'No armour damage',
+      needsArmour()?COST.armour(tons,aFix/c.am):0,needsArmour()?'':blocked.length?'Repair structure first':'Nothing to repair');
   }
   for(const b of c.bins){const B=BINS[b];add('rearm:'+b,`Re-arm ${B.n}`,`${B.loc} bin · ${state.ammo[b]}/${B.max} shots${binLost(b)?' · bin destroyed':''}`,COST.rearm,binLost(b)?'Repair structure first':binNeeds(b)?'':'Full')}
   const g=P.gunnery,p=P.piloting;
   add('gunnery',`Gunnery ${g} → ${g-1}`,tm>1?'Inactive in the battle: ×3 cost':'',COST.gunnery*tm,g<=0?'Already 0':tr.g?'Already trained this downtime':'');
   add('piloting',`Piloting ${p} → ${p-1}`,tm>1?'Inactive in the battle: ×3 cost':'',COST.piloting*tm,p<=0?'Already 0':tr.p?'Already trained this downtime':'');
   $('rpList').innerHTML=rows.map(r=>`<div class="rprow ${r.why?'no':''}"><div><b>${r.label}</b>${r.detail?`<small>${r.detail}</small>`:''}</div>
-    <button type="button" class="rpbtn ${r.why?'':'primary'}" data-k="${r.key}" ${r.why?'disabled':''}>${r.why&&r.key==='x'?'—':`${fmtN(r.cost)} SP<small>${fmtWP(wpFor(h,r.cost))} WP</small>`}</button>${r.why&&r.key!=='x'?`<span class="rpwhy">${r.why}</span>`:''}</div>`).join('');
+    <button type="button" class="rpbtn ${r.why?'':'primary'}" data-k="${r.key}" ${r.why?'disabled':''}>${r.why&&(r.key==='x'||!r.cost)?'—':`${fmtN(r.cost)} SP<small>${fmtWP(wpFor(h,r.cost))} WP</small>`}</button>${r.why&&r.key!=='x'?`<span class="rpwhy">${r.why}</span>`:''}</div>`).join('');
   $('rpList').querySelectorAll('.rpbtn[data-k]').forEach(b=>b.onclick=()=>doRepair(b.dataset.k));
   if(keep)useUnit(keep)}
 function doRepair(key){
-  const id=rpUnit,keep=unitId;useUnit(id);const h=houseOf(id),C=CAMP[h],tons=CH.tons,prev=JSON.stringify(state);
+  const id=rpUnit,keep=unitId;useUnit(id);const h=houseOf(id),C=CAMP[h],tons=CH.tons;
+  // the multiplier first: counting the force reloads every 'Mech from storage, which would drop a change not yet saved
+  const mult=bfsm(h),prev=JSON.stringify(state);
   let cost=0,text='';
-  if(key==='structure'){cost=COST.structure(tons);for(const k of MECH.list){state[k].is=MECH.locs[k].is;state[k].crits=state[k].crits.map(()=>false)}text='Repaired internal structure and critical hits'}
-  else if(key==='armour'){cost=COST.armour(tons);for(const k of MECH.list){const m=MECH.locs[k];if(state[k].is<m.is)continue;state[k].armor=m.armor;if(m.rear!=null)state[k].rear=m.rear}text='Repaired armour'}
+  // the cost comes from the damage before the repair, as the dialog showed it
+  const c=condition();
+  if(key==='structure'){const n=structureToFix();cost=COST.structure(tons,n/c.sm);
+    for(const k of MECH.list){state[k].is=MECH.locs[k].is;state[k].crits=state[k].crits.map(()=>false)}
+    text=`Repaired ${n} structure points${c.cr?` and ${c.cr} critical hit${c.cr===1?'':'s'}`:''}`}
+  else if(key==='armour'){const n=armourToFix();cost=COST.armour(tons,n/c.am);text=`Repaired ${n} armour points`;for(const k of MECH.list){const m=MECH.locs[k];if(state[k].is<m.is)continue;state[k].armor=m.armor;if(m.rear!=null)state[k].rear=m.rear}}
   else if(key.startsWith('rearm:')){const b=key.slice(6);cost=COST.rearm;state.ammo[b]=BINS[b].max;text=`Re-armed ${BINS[b].n} (${BINS[b].loc})`}
   else if(key==='gunnery'){cost=COST.gunnery*trainMult();state.pilot.gunnery--;state.trained={...(state.trained||{}),g:true};text=`Gunnery improved to ${state.pilot.gunnery}`}
   else if(key==='piloting'){cost=COST.piloting*trainMult();state.pilot.piloting--;state.trained={...(state.trained||{}),p:true};text=`Piloting improved to ${state.pilot.piloting}`}
-  const w=wpFor(h,cost);
+  const w=round2(cost/mult);
   if(!cost||w>C.wp){if(keep)useUnit(keep);return}
   C.wp=round2(C.wp-w);log.unshift(`${text} (${cost} SP = −${fmtWP(w)} WP)`);save();
   ledger(h,`${CH.name} ${CH.model}: ${text} (${cost} SP)`,-w,0,id,prev);
   if(keep)useUnit(keep);renderMode();renderHome();renderRepair()}
 
-function showMech(id){useUnit(id);mountMech();appEl.style.visibility='';appEl.hidden=false;document.body.style.overflow='hidden';appEl.scrollTop=0;render()}
+// a sheet opened on its own starts with no hit-location chart: each 'Mech looked at is a different situation
+function showMech(id){useUnit(id);hitDir=null;hitTable='std';mountMech();appEl.style.visibility='';appEl.hidden=false;document.body.style.overflow='hidden';appEl.scrollTop=0;render()}
 function showHome(){closeCard();closePilot();closeHeatAdj();closeHeatPop();appEl.hidden=true;document.body.style.overflow='';homeEl.hidden=false;renderHome()}
 appEl.addEventListener('click',e=>{if(e.target===appEl)split?closeFire():showHome()});   // tap the dimmed roster behind the sheet to close it
 let escTop=false;   // Escape closes the sheet only when no dialog is open on top of it
